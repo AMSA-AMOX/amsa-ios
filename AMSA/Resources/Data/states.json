@@ -1,0 +1,1376 @@
+[
+  {
+    "abbr": "AK",
+    "fips": "02",
+    "name": "Alaska",
+    "cities": [
+      "Anchorage",
+      "Fairbanks",
+      "Juneau",
+      "Sitka"
+    ],
+    "colTier": "high",
+    "monthlyRent": "$1,200–$1,800",
+    "climate": "Subarctic — extreme cold winters, mild brief summers",
+    "tempRange": "Summer 15–22°C · Winter −25 to −5°C",
+    "publicTransport": "poor",
+    "transitInfo": "People Mover bus in Anchorage — pay cash or buy a Connect Card at transit centers. MACS Transit in Fairbanks. Juneau and most of rural Alaska have no road connections; a car or small plane is essential.",
+    "places": [
+      "Denali National Park",
+      "Glacier Bay National Park",
+      "Kenai Fjords",
+      "Northern Lights viewing",
+      "Sitka National Historical Park"
+    ],
+    "photo": {
+      "file": "fairbanks_alaska.webp",
+      "location": "Fairbanks"
+    }
+  },
+  {
+    "abbr": "AL",
+    "fips": "01",
+    "name": "Alabama",
+    "cities": [
+      "Birmingham",
+      "Huntsville",
+      "Tuscaloosa"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$800–$1,100",
+    "climate": "Subtropical — hot summers, mild winters",
+    "tempRange": "Summer 30–35°C · Winter 2–10°C",
+    "publicTransport": "poor",
+    "transitInfo": "No major transit system. Birmingham MAX bus exists but is very limited. Rideshare (Uber/Lyft) is the practical option; a car is strongly recommended.",
+    "places": [
+      "Birmingham Civil Rights Institute",
+      "U.S. Space & Rocket Center",
+      "Gulf Shores beaches",
+      "Cheaha State Park"
+    ],
+    "photo": {
+      "file": "birmingham_al.webp",
+      "location": "Birmingham"
+    }
+  },
+  {
+    "abbr": "AZ",
+    "fips": "04",
+    "name": "Arizona",
+    "cities": [
+      "Phoenix",
+      "Tempe",
+      "Tucson"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,200–$1,800",
+    "climate": "Desert — very hot summers, mild winters",
+    "tempRange": "Summer 38–43°C · Winter 8–18°C",
+    "publicTransport": "limited",
+    "transitInfo": "Valley Metro light rail and bus in Phoenix/Tempe — use the Valley Metro app or buy day passes at station kiosks. Sun Tran bus in Tucson. Outside these cities a car is required.",
+    "places": [
+      "Grand Canyon National Park",
+      "Sedona Red Rock Country",
+      "Monument Valley",
+      "Antelope Canyon"
+    ],
+    "photo": {
+      "file": "monument_valley_az.webp",
+      "location": "Monument Valley"
+    }
+  },
+  {
+    "abbr": "AR",
+    "fips": "05",
+    "name": "Arkansas",
+    "cities": [
+      "Fayetteville",
+      "Little Rock",
+      "Jonesboro"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$700–$1,000",
+    "climate": "Humid subtropical — hot summers, cold winters",
+    "tempRange": "Summer 30–35°C · Winter −2 to 8°C",
+    "publicTransport": "poor",
+    "transitInfo": "Rock Region Metro bus in Little Rock offers limited routes. No rail service. Rideshare apps are the main option; a car is essential outside campus.",
+    "places": [
+      "Ozark Mountains",
+      "Hot Springs National Park",
+      "Buffalo National River",
+      "Thorncrown Chapel"
+    ],
+    "photo": {
+      "file": "eureka_springs_arkansas.webp",
+      "location": "Eureka Springs"
+    }
+  },
+  {
+    "abbr": "CA",
+    "fips": "06",
+    "name": "California",
+    "cities": [
+      "Los Angeles",
+      "San Francisco",
+      "San Diego",
+      "Berkeley"
+    ],
+    "colTier": "very_high",
+    "monthlyRent": "$2,200–$3,500",
+    "climate": "Mediterranean to semi-arid — warm dry summers, mild winters",
+    "tempRange": "Summer 22–35°C · Winter 5–15°C",
+    "publicTransport": "good",
+    "transitInfo": "LA Metro (bus + rail) uses a TAP card — buy one at any station for $2 + load value. SF Muni and BART use a Clipper card (tap on/off). San Diego MTS uses Pronto card. Download the respective city app for real-time routes.",
+    "places": [
+      "Yosemite National Park",
+      "Golden Gate Bridge",
+      "Big Sur coastline",
+      "Joshua Tree National Park",
+      "Napa Valley"
+    ],
+    "photo": {
+      "file": "la_california.webp",
+      "location": "Los Angeles"
+    }
+  },
+  {
+    "abbr": "CO",
+    "fips": "08",
+    "name": "Colorado",
+    "cities": [
+      "Denver",
+      "Boulder",
+      "Fort Collins",
+      "Colorado Springs"
+    ],
+    "colTier": "high",
+    "monthlyRent": "$1,500–$2,200",
+    "climate": "Semi-arid — sunny, cold winters with significant snow",
+    "tempRange": "Summer 25–32°C · Winter −10 to 5°C",
+    "publicTransport": "limited",
+    "transitInfo": "RTD bus and light rail in Denver — load a MyRide card at station vending machines or pay via the RTD Mobile app. Boulder's HOP/SKIP/JUMP buses are free for students. Outside Denver, a car is needed.",
+    "places": [
+      "Rocky Mountain National Park",
+      "Mesa Verde",
+      "Red Rocks Amphitheatre",
+      "Maroon Bells",
+      "Garden of the Gods"
+    ],
+    "photo": {
+      "file": "aspen_co.webp",
+      "location": "Aspen"
+    }
+  },
+  {
+    "abbr": "CT",
+    "fips": "09",
+    "name": "Connecticut",
+    "cities": [
+      "New Haven",
+      "Hartford",
+      "Storrs",
+      "Stamford"
+    ],
+    "colTier": "high",
+    "monthlyRent": "$1,600–$2,400",
+    "climate": "Humid continental — cold winters, warm humid summers",
+    "tempRange": "Summer 25–30°C · Winter −8 to 3°C",
+    "publicTransport": "good",
+    "transitInfo": "CT Transit buses run throughout the state — buy multi-ride tickets at transit offices or use the CT Transit app. Metro-North commuter rail connects New Haven and Stamford directly to NYC Grand Central (45–90 min).",
+    "places": [
+      "Yale University campus",
+      "Mystic Seaport Museum",
+      "Mark Twain House",
+      "Sleeping Giant State Park"
+    ],
+    "photo": {
+      "file": "hartford_connecticut.webp",
+      "location": "Hartford"
+    }
+  },
+  {
+    "abbr": "DE",
+    "fips": "10",
+    "name": "Delaware",
+    "cities": [
+      "Wilmington",
+      "Newark",
+      "Dover"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,200–$1,600",
+    "climate": "Humid subtropical — moderate, four distinct seasons",
+    "tempRange": "Summer 27–32°C · Winter −2 to 6°C",
+    "publicTransport": "limited",
+    "transitInfo": "DART First State bus covers Wilmington and Newark — pay cash onboard or use a DART card. Amtrak runs frequently through Wilmington station to Philadelphia (30 min) and NYC (1.5 hrs).",
+    "places": [
+      "Rehoboth Beach",
+      "First State National Monument",
+      "Brandywine Valley",
+      "Cape Henlopen State Park"
+    ],
+    "photo": {
+      "file": "rehoboth_beach_delaware.webp",
+      "location": "Rehoboth Beach"
+    }
+  },
+  {
+    "abbr": "DC",
+    "fips": "11",
+    "name": "Washington D.C.",
+    "cities": [
+      "Washington"
+    ],
+    "colTier": "very_high",
+    "monthlyRent": "$2,500–$3,800",
+    "climate": "Humid subtropical — hot summers, cold winters",
+    "tempRange": "Summer 30–35°C · Winter −3 to 5°C",
+    "publicTransport": "excellent",
+    "transitInfo": "WMATA Metro (subway, 6 lines) + Metrobus — get a SmarTrip card ($2) at any Metro station kiosk and load value onto it; tap in and out at turnstiles. Use the Transit or DC Metro apps for real-time arrivals.",
+    "places": [
+      "National Mall & Monuments",
+      "Smithsonian museums",
+      "Georgetown waterfront",
+      "U.S. Capitol"
+    ],
+    "photo": {
+      "file": "washington_dc.webp",
+      "location": "Washington D.C."
+    }
+  },
+  {
+    "abbr": "FL",
+    "fips": "12",
+    "name": "Florida",
+    "cities": [
+      "Miami",
+      "Orlando",
+      "Tampa",
+      "Gainesville",
+      "Tallahassee"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,400–$2,200",
+    "climate": "Tropical — hot, humid, hurricane season June–November",
+    "tempRange": "Summer 32–36°C · Winter 12–22°C",
+    "publicTransport": "limited",
+    "transitInfo": "Miami-Dade Metrorail + Metrobus use an EASY Card (buy at Metrorail stations). SunRail commuter rail in Orlando. Most Florida cities are car-dependent; rideshare is widely available.",
+    "places": [
+      "Everglades National Park",
+      "Kennedy Space Center",
+      "St. Augustine Old Town",
+      "Florida Keys",
+      "Clearwater Beach"
+    ],
+    "photo": {
+      "file": "miami_fl.webp",
+      "location": "Miami"
+    }
+  },
+  {
+    "abbr": "GA",
+    "fips": "13",
+    "name": "Georgia",
+    "cities": [
+      "Atlanta",
+      "Athens",
+      "Savannah",
+      "Augusta"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,200–$1,900",
+    "climate": "Humid subtropical — hot summers, mild winters",
+    "tempRange": "Summer 30–35°C · Winter 3–12°C",
+    "publicTransport": "limited",
+    "transitInfo": "MARTA subway (2 lines) and bus in Atlanta — use a Breeze card (buy at any MARTA station, $2 + load value). Athens Transit and Savannah Dot buses cover those cities. Outside Atlanta, a car is needed.",
+    "places": [
+      "Savannah Historic District",
+      "Atlanta BeltLine",
+      "Stone Mountain",
+      "Georgia Aquarium",
+      "Cumberland Island"
+    ],
+    "photo": {
+      "file": "atlanta_ga.webp",
+      "location": "Atlanta"
+    }
+  },
+  {
+    "abbr": "HI",
+    "fips": "15",
+    "name": "Hawaii",
+    "cities": [
+      "Honolulu",
+      "Hilo",
+      "Kailua"
+    ],
+    "colTier": "very_high",
+    "monthlyRent": "$2,000–$3,000",
+    "climate": "Tropical — warm year-round, trade winds, occasional heavy rain",
+    "tempRange": "Summer 28–32°C · Winter 22–27°C",
+    "publicTransport": "limited",
+    "transitInfo": "TheBus on Oahu is the main option — use a HOLO card (buy at ABC stores or 7-Eleven) or pay cash. Maui Bus and Big Island Transit run but are infrequent. Rideshare available on all major islands.",
+    "places": [
+      "Waikiki Beach",
+      "Volcanoes National Park",
+      "Na Pali Coast",
+      "Pearl Harbor",
+      "Haleakalā National Park"
+    ],
+    "photo": {
+      "file": "oahu_hawaii.webp",
+      "location": "Oahu"
+    }
+  },
+  {
+    "abbr": "ID",
+    "fips": "16",
+    "name": "Idaho",
+    "cities": [
+      "Boise",
+      "Moscow",
+      "Pocatello",
+      "Twin Falls"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$900–$1,300",
+    "climate": "Semi-arid — cold winters, warm summers",
+    "tempRange": "Summer 25–35°C · Winter −8 to 5°C",
+    "publicTransport": "poor",
+    "transitInfo": "Valley Ride bus in Boise/Nampa — pay cash or buy passes at the Valley Ride office. No commuter rail. A car is essential in all Idaho cities.",
+    "places": [
+      "Craters of the Moon",
+      "Sawtooth Mountains",
+      "Sun Valley",
+      "Shoshone Falls",
+      "Coeur d'Alene Lake"
+    ],
+    "photo": {
+      "file": "stanley_lake_idaho.webp",
+      "location": "Stanley Lake"
+    }
+  },
+  {
+    "abbr": "IL",
+    "fips": "17",
+    "name": "Illinois",
+    "cities": [
+      "Chicago",
+      "Champaign-Urbana",
+      "Evanston",
+      "Peoria"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,100–$2,000",
+    "climate": "Humid continental — very cold winters, hot humid summers",
+    "tempRange": "Summer 28–33°C · Winter −12 to −1°C",
+    "publicTransport": "excellent",
+    "transitInfo": "Chicago CTA L train (8 lines) and buses use a Ventra card — buy one at any L station ($5 deposit, reloadable via app or kiosk). Metra commuter rail connects suburbs. Use the Transit or Ventra app for real-time tracking.",
+    "places": [
+      "Millennium Park Chicago",
+      "Navy Pier",
+      "Starved Rock State Park",
+      "Art Institute of Chicago"
+    ],
+    "photo": {
+      "file": "chicago_il.webp",
+      "location": "Chicago"
+    }
+  },
+  {
+    "abbr": "IN",
+    "fips": "18",
+    "name": "Indiana",
+    "cities": [
+      "Indianapolis",
+      "Bloomington",
+      "West Lafayette",
+      "South Bend"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$800–$1,200",
+    "climate": "Humid continental — cold winters, warm summers",
+    "tempRange": "Summer 27–32°C · Winter −8 to 3°C",
+    "publicTransport": "poor",
+    "transitInfo": "IndyGo bus in Indianapolis — board and pay cash or use the Open Access fareboxes. Bloomington Transit and Purdue CityBus serve campus areas. A car is needed for most travel.",
+    "places": [
+      "Indiana Dunes National Park",
+      "Brown County State Park",
+      "Indianapolis Motor Speedway",
+      "Turkey Run State Park"
+    ],
+    "photo": {
+      "file": "indiana_dunes_national_park_indiana.webp",
+      "location": "Indiana Dunes"
+    }
+  },
+  {
+    "abbr": "IA",
+    "fips": "19",
+    "name": "Iowa",
+    "cities": [
+      "Iowa City",
+      "Ames",
+      "Des Moines",
+      "Cedar Falls"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$750–$1,100",
+    "climate": "Humid continental — very cold winters, hot summers",
+    "tempRange": "Summer 28–33°C · Winter −15 to −2°C",
+    "publicTransport": "poor",
+    "transitInfo": "Iowa City Cambus is free for university students. DART bus in Des Moines and CyRide in Ames. Routes are infrequent; use Google Maps for schedules. A car is strongly recommended.",
+    "places": [
+      "Effigy Mounds National Monument",
+      "Pikes Peak State Park",
+      "Iowa Great Lakes",
+      "Field of Dreams movie site"
+    ],
+    "photo": {
+      "file": "northeastern_iowa.webp",
+      "location": "Northeastern Iowa"
+    }
+  },
+  {
+    "abbr": "KS",
+    "fips": "20",
+    "name": "Kansas",
+    "cities": [
+      "Lawrence",
+      "Manhattan",
+      "Wichita",
+      "Topeka"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$750–$1,100",
+    "climate": "Humid continental — hot summers, cold winters, tornado risk",
+    "tempRange": "Summer 32–38°C · Winter −8 to 5°C",
+    "publicTransport": "poor",
+    "transitInfo": "Wichita Transit and Topeka Metro offer very limited bus routes. Lawrence Transit serves KU campus. No rail. A car is essential; rideshare coverage is limited outside major cities.",
+    "places": [
+      "Tallgrass Prairie National Preserve",
+      "Flint Hills Scenic Byway",
+      "Monument Rocks",
+      "Eisenhower Presidential Library"
+    ],
+    "photo": {
+      "file": "wichita_kansas.webp",
+      "location": "Wichita"
+    }
+  },
+  {
+    "abbr": "KY",
+    "fips": "21",
+    "name": "Kentucky",
+    "cities": [
+      "Lexington",
+      "Louisville",
+      "Bowling Green"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$800–$1,200",
+    "climate": "Humid subtropical — four distinct seasons, hot summers",
+    "tempRange": "Summer 28–33°C · Winter −3 to 8°C",
+    "publicTransport": "poor",
+    "transitInfo": "TARC bus in Louisville and Lextran in Lexington cover main routes — pay cash onboard or buy passes at transit centers. No commuter rail. A car is recommended for most destinations.",
+    "places": [
+      "Mammoth Cave National Park",
+      "Red River Gorge",
+      "Louisville Bourbon Trail",
+      "Daniel Boone National Forest"
+    ],
+    "photo": {
+      "file": "louisville_ky.webp",
+      "location": "Louisville"
+    }
+  },
+  {
+    "abbr": "LA",
+    "fips": "22",
+    "name": "Louisiana",
+    "cities": [
+      "New Orleans",
+      "Baton Rouge",
+      "Lafayette"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$900–$1,400",
+    "climate": "Subtropical — hot, humid, hurricane season June–November",
+    "tempRange": "Summer 32–36°C · Winter 7–16°C",
+    "publicTransport": "limited",
+    "transitInfo": "New Orleans RTA Streetcar and bus — buy a Jazzy Pass (1-day or monthly) at Walgreens or online. The iconic St. Charles streetcar is a flat fare. Baton Rouge has BR Transit bus. Rideshare is widely used.",
+    "places": [
+      "New Orleans French Quarter",
+      "Bayou swamp tours",
+      "Oak Alley Plantation",
+      "Atchafalaya Basin"
+    ],
+    "photo": {
+      "file": "new_orleans_bayou_louisiana.webp",
+      "location": "New Orleans"
+    }
+  },
+  {
+    "abbr": "ME",
+    "fips": "23",
+    "name": "Maine",
+    "cities": [
+      "Portland",
+      "Orono",
+      "Augusta"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,000–$1,500",
+    "climate": "Humid continental — very cold snowy winters, mild summers",
+    "tempRange": "Summer 20–27°C · Winter −15 to −2°C",
+    "publicTransport": "poor",
+    "transitInfo": "Metro bus in Portland and The Connector in Bangor/Orono — pay cash or buy passes at transit offices. Amtrak Downeaster runs Portland–Boston (2 hrs). A car is essential outside Portland.",
+    "places": [
+      "Acadia National Park",
+      "Portland Head Light",
+      "Kennebunkport",
+      "Baxter State Park"
+    ],
+    "photo": {
+      "file": "portland_me.webp",
+      "location": "Portland"
+    }
+  },
+  {
+    "abbr": "MD",
+    "fips": "24",
+    "name": "Maryland",
+    "cities": [
+      "College Park",
+      "Baltimore",
+      "Bethesda",
+      "Annapolis"
+    ],
+    "colTier": "high",
+    "monthlyRent": "$1,500–$2,400",
+    "climate": "Humid subtropical — hot summers, cold winters",
+    "tempRange": "Summer 28–33°C · Winter −3 to 6°C",
+    "publicTransport": "good",
+    "transitInfo": "MTA Baltimore bus and subway use a CharmCard — buy at transit stores or online. MARC commuter rail links Baltimore and suburbs to DC ($7–$9 one-way). DC Metro (WMATA) is accessible from Bethesda and Silver Spring with a SmarTrip card.",
+    "places": [
+      "Assateague Island",
+      "Chesapeake Bay",
+      "Ocean City boardwalk",
+      "Antietam Battlefield"
+    ],
+    "photo": {
+      "file": "annapolis_md.webp",
+      "location": "Annapolis"
+    }
+  },
+  {
+    "abbr": "MA",
+    "fips": "25",
+    "name": "Massachusetts",
+    "cities": [
+      "Boston",
+      "Cambridge",
+      "Worcester",
+      "Amherst"
+    ],
+    "colTier": "very_high",
+    "monthlyRent": "$2,000–$3,200",
+    "climate": "Humid continental — cold winters, warm humid summers",
+    "tempRange": "Summer 23–30°C · Winter −8 to 3°C",
+    "publicTransport": "excellent",
+    "transitInfo": "MBTA subway (the T, 5 lines), bus, and commuter rail — get a CharlieCard (free at T stations) and load value via the mTicket app or station kiosks. Use the MBTA app for real-time arrivals. Commuter rail extends to Providence, Worcester, and Lowell.",
+    "places": [
+      "Freedom Trail Boston",
+      "Cape Cod National Seashore",
+      "Martha's Vineyard",
+      "Salem Historic District"
+    ],
+    "photo": {
+      "file": "boston_ma.webp",
+      "location": "Boston"
+    }
+  },
+  {
+    "abbr": "MI",
+    "fips": "26",
+    "name": "Michigan",
+    "cities": [
+      "Ann Arbor",
+      "East Lansing",
+      "Detroit",
+      "Kalamazoo"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,000–$1,500",
+    "climate": "Humid continental — very cold snowy winters, warm summers",
+    "tempRange": "Summer 23–28°C · Winter −12 to −1°C",
+    "publicTransport": "limited",
+    "transitInfo": "DDOT and SMART buses serve Detroit metro — pay cash or use a Fareset card. TheRide (AATA) in Ann Arbor and CATA in East Lansing serve campus areas well. Detroit has a free Downtown People Mover loop. A car is needed beyond these areas.",
+    "places": [
+      "Pictured Rocks National Lakeshore",
+      "Mackinac Island",
+      "Sleeping Bear Dunes",
+      "Tahquamenon Falls"
+    ],
+    "photo": {
+      "file": "detroit_mi.webp",
+      "location": "Detroit"
+    }
+  },
+  {
+    "abbr": "MN",
+    "fips": "27",
+    "name": "Minnesota",
+    "cities": [
+      "Minneapolis",
+      "Saint Paul",
+      "Duluth",
+      "Rochester"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,000–$1,600",
+    "climate": "Humid continental — extremely cold winters, warm summers",
+    "tempRange": "Summer 23–28°C · Winter −20 to −5°C",
+    "publicTransport": "good",
+    "transitInfo": "Metro Transit light rail (Green + Blue lines) and bus in Minneapolis–St. Paul — use a Go-To card (buy at any rail station for $1 + load value) or tap a credit card. Use the Metro Transit app. The METRO A Line BRT is also useful along Snelling Ave.",
+    "places": [
+      "Boundary Waters Canoe Area",
+      "Minnehaha Falls",
+      "Voyageurs National Park",
+      "Mall of America"
+    ],
+    "photo": {
+      "file": "minneapolis_minnesota.webp",
+      "location": "Minneapolis"
+    }
+  },
+  {
+    "abbr": "MS",
+    "fips": "28",
+    "name": "Mississippi",
+    "cities": [
+      "Oxford",
+      "Jackson",
+      "Starkville",
+      "Hattiesburg"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$650–$950",
+    "climate": "Humid subtropical — very hot summers, mild winters",
+    "tempRange": "Summer 32–36°C · Winter 3–12°C",
+    "publicTransport": "poor",
+    "transitInfo": "JATRAN bus in Jackson offers very limited coverage. No rail transit. Rideshare (Uber/Lyft) is available in Jackson and college towns. A car is essential everywhere in Mississippi.",
+    "places": [
+      "Natchez Trace Parkway",
+      "Gulf Islands National Seashore",
+      "Mississippi Blues Trail",
+      "Vicksburg National Battlefield"
+    ],
+    "photo": {
+      "file": "tupelo_mississippi.webp",
+      "location": "Tupelo"
+    }
+  },
+  {
+    "abbr": "MO",
+    "fips": "29",
+    "name": "Missouri",
+    "cities": [
+      "St. Louis",
+      "Columbia",
+      "Kansas City",
+      "Springfield"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$850–$1,300",
+    "climate": "Humid continental — hot summers, cold winters",
+    "tempRange": "Summer 30–35°C · Winter −5 to 5°C",
+    "publicTransport": "limited",
+    "transitInfo": "MetroLink light rail and MetroBus in St. Louis — buy stored-value tickets at station kiosks. KC Streetcar in Kansas City is free downtown. RideKC bus requires a Ride KC card or cash. A car is needed outside these corridors.",
+    "places": [
+      "Gateway Arch St. Louis",
+      "Ozark National Scenic Riverways",
+      "Silver Dollar City",
+      "Mark Twain's Hannibal"
+    ],
+    "photo": {
+      "file": "st_louis_missouri.webp",
+      "location": "St. Louis"
+    }
+  },
+  {
+    "abbr": "MT",
+    "fips": "30",
+    "name": "Montana",
+    "cities": [
+      "Missoula",
+      "Bozeman",
+      "Billings",
+      "Great Falls"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,000–$1,500",
+    "climate": "Semi-arid continental — very cold winters, warm summers",
+    "tempRange": "Summer 22–32°C · Winter −20 to −3°C",
+    "publicTransport": "poor",
+    "transitInfo": "Mountain Line bus in Missoula and Streamline in Bozeman offer limited routes — pay cash onboard. No rail service. A car is absolutely essential everywhere in Montana.",
+    "places": [
+      "Glacier National Park",
+      "Yellowstone north entrance",
+      "Beartooth Highway",
+      "Going-to-the-Sun Road"
+    ],
+    "photo": {
+      "file": "glacier_national_park_montana.webp",
+      "location": "Glacier NP"
+    }
+  },
+  {
+    "abbr": "NE",
+    "fips": "31",
+    "name": "Nebraska",
+    "cities": [
+      "Lincoln",
+      "Omaha",
+      "Kearney"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$800–$1,200",
+    "climate": "Humid continental — cold winters, hot summers",
+    "tempRange": "Summer 28–35°C · Winter −12 to 0°C",
+    "publicTransport": "poor",
+    "transitInfo": "StarTran bus in Lincoln and Metro bus in Omaha — buy passes at transit centers or pay cash. No commuter rail. A car is strongly recommended for everything beyond campus.",
+    "places": [
+      "Chimney Rock",
+      "Scotts Bluff National Monument",
+      "Sandhills Prairie",
+      "Fontenelle Forest Omaha"
+    ],
+    "photo": {
+      "file": "old_market_district_omaha_ne.webp",
+      "location": "Omaha"
+    }
+  },
+  {
+    "abbr": "NV",
+    "fips": "32",
+    "name": "Nevada",
+    "cities": [
+      "Las Vegas",
+      "Reno",
+      "Henderson"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,200–$1,700",
+    "climate": "Desert — very hot dry summers, mild winters",
+    "tempRange": "Summer 38–43°C · Winter 2–12°C",
+    "publicTransport": "limited",
+    "transitInfo": "RTC bus and BRT (the Deuce and ACE rapid routes) in Las Vegas — use the Ride RTC app to buy passes or pay cash. Regional Connect bus in Reno. No rail in Las Vegas; Amtrak serves Reno. Rideshare is widely available on the Strip.",
+    "places": [
+      "Red Rock Canyon",
+      "Valley of Fire State Park",
+      "Lake Tahoe south shore",
+      "Great Basin National Park"
+    ],
+    "photo": {
+      "file": "las_vegas_nevada.webp",
+      "location": "Las Vegas"
+    }
+  },
+  {
+    "abbr": "NH",
+    "fips": "33",
+    "name": "New Hampshire",
+    "cities": [
+      "Durham",
+      "Manchester",
+      "Hanover",
+      "Concord"
+    ],
+    "colTier": "high",
+    "monthlyRent": "$1,400–$2,000",
+    "climate": "Humid continental — very cold snowy winters, warm summers",
+    "tempRange": "Summer 22–28°C · Winter −15 to −1°C",
+    "publicTransport": "poor",
+    "transitInfo": "COAST bus in Seacoast region, Manchester Transit, and Advance Transit near Dartmouth. Concord Coach Lines intercity bus runs to Boston South Station. Amtrak is accessible from Lowell, MA. A car is essential for most travel.",
+    "places": [
+      "White Mountain National Forest",
+      "Mount Washington",
+      "Lake Winnipesaukee",
+      "Kancamagus Highway"
+    ],
+    "photo": {
+      "file": "mt_washington_auto_road_new_hampshire.webp",
+      "location": "Mt. Washington"
+    }
+  },
+  {
+    "abbr": "NJ",
+    "fips": "34",
+    "name": "New Jersey",
+    "cities": [
+      "Princeton",
+      "New Brunswick",
+      "Newark",
+      "Hoboken"
+    ],
+    "colTier": "very_high",
+    "monthlyRent": "$1,800–$2,800",
+    "climate": "Humid subtropical/continental — four seasons",
+    "tempRange": "Summer 27–32°C · Winter −3 to 5°C",
+    "publicTransport": "excellent",
+    "transitInfo": "NJ Transit bus and rail — buy tickets via the MyTix app or at station vending machines. Direct trains to NYC Penn Station from most NJ cities (30–60 min). PATH train connects Newark/Hoboken to NYC (24/7). Use the NJ Transit app for real-time schedules.",
+    "places": [
+      "Cape May Victorian district",
+      "Liberty State Park",
+      "Delaware Water Gap",
+      "Jersey Shore beaches"
+    ],
+    "photo": {
+      "file": "ocean_city_nj.webp",
+      "location": "Ocean City"
+    }
+  },
+  {
+    "abbr": "NM",
+    "fips": "35",
+    "name": "New Mexico",
+    "cities": [
+      "Albuquerque",
+      "Las Cruces",
+      "Santa Fe"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$850–$1,300",
+    "climate": "Semi-arid — dry, sunny, cold at elevation in winter",
+    "tempRange": "Summer 30–35°C · Winter −3 to 8°C",
+    "publicTransport": "poor",
+    "transitInfo": "ABQ Ride bus in Albuquerque and Rail Runner commuter train (Belen to Santa Fe, ~$2–$9) — use Google Maps for ABQ Ride routes; buy Rail Runner tickets at station kiosks. A car is needed outside Albuquerque.",
+    "places": [
+      "White Sands National Park",
+      "Carlsbad Caverns",
+      "Santa Fe Plaza",
+      "Taos Pueblo"
+    ],
+    "photo": {
+      "file": "santafe_nm.webp",
+      "location": "Santa Fe"
+    }
+  },
+  {
+    "abbr": "NY",
+    "fips": "36",
+    "name": "New York",
+    "cities": [
+      "New York City",
+      "Ithaca",
+      "Rochester",
+      "Albany",
+      "Buffalo"
+    ],
+    "colTier": "very_high",
+    "monthlyRent": "$2,500–$4,500",
+    "climate": "Humid continental — cold winters, hot summers (NYC milder)",
+    "tempRange": "Summer 25–32°C · Winter −8 to 3°C",
+    "publicTransport": "excellent",
+    "transitInfo": "NYC Subway (24/7, 472 stations) and MTA bus — tap your bank card directly at turnstiles (OMNY) or use a MetroCard ($1 + load value at kiosks). Upstate: CDTA in Albany, RTS in Rochester. Use the MTA app or Google Maps for routes.",
+    "places": [
+      "Niagara Falls",
+      "Adirondack Mountains",
+      "Central Park NYC",
+      "Hudson Valley",
+      "Finger Lakes wine region"
+    ],
+    "photo": {
+      "file": "brooklyn_ny.webp",
+      "location": "Brooklyn"
+    }
+  },
+  {
+    "abbr": "NC",
+    "fips": "37",
+    "name": "North Carolina",
+    "cities": [
+      "Chapel Hill",
+      "Durham",
+      "Raleigh",
+      "Charlotte",
+      "Greensboro"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,100–$1,700",
+    "climate": "Humid subtropical — hot summers, mild winters",
+    "tempRange": "Summer 28–33°C · Winter 1–10°C",
+    "publicTransport": "limited",
+    "transitInfo": "GoTriangle bus and Durham Area Transit in Research Triangle — use the GoPass app or pay cash. CATS light rail (Blue Line) in Charlotte with a light rail card. A car is recommended for most travel outside downtown corridors.",
+    "places": [
+      "Blue Ridge Parkway",
+      "Great Smoky Mountains",
+      "Outer Banks",
+      "Biltmore Estate Asheville"
+    ],
+    "photo": {
+      "file": "charlotte_nc.webp",
+      "location": "Charlotte"
+    }
+  },
+  {
+    "abbr": "ND",
+    "fips": "38",
+    "name": "North Dakota",
+    "cities": [
+      "Fargo",
+      "Grand Forks",
+      "Bismarck"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$750–$1,100",
+    "climate": "Humid continental — extremely cold winters, warm summers",
+    "tempRange": "Summer 25–30°C · Winter −22 to −8°C",
+    "publicTransport": "poor",
+    "transitInfo": "Matbus in Fargo and Cities Area Transit in Bismarck — pay cash or buy passes at city offices. No rail transit. A car is absolutely essential in North Dakota.",
+    "places": [
+      "Theodore Roosevelt National Park",
+      "Medora Badlands",
+      "International Peace Garden",
+      "Fort Union Trading Post"
+    ],
+    "photo": {
+      "file": "theodore_roosevelt_national_park_north_dakota.webp",
+      "location": "Theodore Roosevelt NP"
+    }
+  },
+  {
+    "abbr": "OH",
+    "fips": "39",
+    "name": "Ohio",
+    "cities": [
+      "Columbus",
+      "Cleveland",
+      "Cincinnati",
+      "Athens",
+      "Oxford"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$850–$1,400",
+    "climate": "Humid continental — cold winters, warm humid summers",
+    "tempRange": "Summer 25–30°C · Winter −8 to 3°C",
+    "publicTransport": "limited",
+    "transitInfo": "COTA bus in Columbus, RTA bus + HealthLine BRT in Cleveland, and Metro bus in Cincinnati — pay cash or buy stored-value passes at transit centers. No subway; use Google Maps for route planning. A car is recommended outside downtown.",
+    "places": [
+      "Cuyahoga Valley National Park",
+      "Rock & Roll Hall of Fame",
+      "Hocking Hills State Park",
+      "Cedar Point"
+    ],
+    "photo": {
+      "file": "columbus_ohio.webp",
+      "location": "Columbus"
+    }
+  },
+  {
+    "abbr": "OK",
+    "fips": "40",
+    "name": "Oklahoma",
+    "cities": [
+      "Norman",
+      "Stillwater",
+      "Tulsa",
+      "Oklahoma City"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$750–$1,100",
+    "climate": "Humid subtropical — hot summers, cold winters, tornado risk",
+    "tempRange": "Summer 33–38°C · Winter −3 to 8°C",
+    "publicTransport": "poor",
+    "transitInfo": "EMBARK bus in Oklahoma City and Tulsa Transit — pay cash or buy passes at transit offices. No rail. A car is essential everywhere; rideshare is available in OKC and Tulsa.",
+    "places": [
+      "Wichita Mountains Wildlife Refuge",
+      "Chickasaw National Recreation Area",
+      "Route 66 historic sites",
+      "Talimena Scenic Drive"
+    ],
+    "photo": {
+      "file": "scissortail_park_oklahoma.webp",
+      "location": "Scissortail Park"
+    }
+  },
+  {
+    "abbr": "OR",
+    "fips": "41",
+    "name": "Oregon",
+    "cities": [
+      "Portland",
+      "Eugene",
+      "Corvallis",
+      "Ashland"
+    ],
+    "colTier": "high",
+    "monthlyRent": "$1,400–$2,100",
+    "climate": "Oceanic — mild rainy winters, warm dry summers",
+    "tempRange": "Summer 22–28°C · Winter 2–8°C",
+    "publicTransport": "good",
+    "transitInfo": "TriMet bus and MAX light rail (6 lines) in Portland — get a Hop Fastpass card (buy at Fred Meyer or online) or tap a contactless card. Lane Transit District in Eugene. Use the TriMet app. Portland is very walkable and bike-friendly.",
+    "places": [
+      "Crater Lake National Park",
+      "Columbia River Gorge",
+      "Cannon Beach Haystack Rock",
+      "Oregon Coast Highway"
+    ],
+    "photo": {
+      "file": "multnomah_falls_or.webp",
+      "location": "Multnomah Falls"
+    }
+  },
+  {
+    "abbr": "PA",
+    "fips": "42",
+    "name": "Pennsylvania",
+    "cities": [
+      "Philadelphia",
+      "Pittsburgh",
+      "State College",
+      "Bethlehem"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,100–$1,900",
+    "climate": "Humid continental — cold winters, hot humid summers",
+    "tempRange": "Summer 25–30°C · Winter −5 to 5°C",
+    "publicTransport": "good",
+    "transitInfo": "SEPTA in Philadelphia — buy a SEPTA Key card at any station ($4.95 + load value) or pay cash on buses. Port Authority (PAT) bus and light rail (T) in Pittsburgh — use a ConnectCard. Amtrak connects Philadelphia, Pittsburgh, and Harrisburg.",
+    "places": [
+      "Independence Hall Philadelphia",
+      "Gettysburg Battlefield",
+      "Fallingwater",
+      "Delaware Water Gap"
+    ],
+    "photo": {
+      "file": "philadelphia_pennsylvania.webp",
+      "location": "Philadelphia"
+    }
+  },
+  {
+    "abbr": "RI",
+    "fips": "44",
+    "name": "Rhode Island",
+    "cities": [
+      "Providence",
+      "Newport",
+      "Warwick"
+    ],
+    "colTier": "high",
+    "monthlyRent": "$1,500–$2,200",
+    "climate": "Humid continental — cold winters, warm summers",
+    "tempRange": "Summer 22–28°C · Winter −6 to 3°C",
+    "publicTransport": "limited",
+    "transitInfo": "RIPTA bus statewide — pay cash onboard or use a Wave card (buy at RIPTA HQ or Providence City Hall). MBTA commuter rail connects Providence to Boston South Station in ~45 min.",
+    "places": [
+      "Newport Mansions",
+      "Block Island",
+      "Narragansett Beach",
+      "Roger Williams Park"
+    ],
+    "photo": {
+      "file": "newport_rhode_island.webp",
+      "location": "Newport"
+    }
+  },
+  {
+    "abbr": "SC",
+    "fips": "45",
+    "name": "South Carolina",
+    "cities": [
+      "Columbia",
+      "Charleston",
+      "Clemson",
+      "Greenville"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,000–$1,500",
+    "climate": "Humid subtropical — hot summers, mild winters",
+    "tempRange": "Summer 30–35°C · Winter 3–12°C",
+    "publicTransport": "poor",
+    "transitInfo": "COMET bus in Columbia and CARTA bus in Charleston — pay cash or buy passes at transit offices. No commuter rail. A car is needed for most travel; rideshare is available in major cities.",
+    "places": [
+      "Charleston Historic District",
+      "Congaree National Park",
+      "Myrtle Beach",
+      "Table Rock State Park"
+    ],
+    "photo": {
+      "file": "charleston_sc.webp",
+      "location": "Charleston"
+    }
+  },
+  {
+    "abbr": "SD",
+    "fips": "46",
+    "name": "South Dakota",
+    "cities": [
+      "Vermillion",
+      "Brookings",
+      "Sioux Falls",
+      "Rapid City"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$750–$1,100",
+    "climate": "Humid continental — cold winters, hot summers",
+    "tempRange": "Summer 25–32°C · Winter −18 to −3°C",
+    "publicTransport": "poor",
+    "transitInfo": "Sioux Area Metro (SAM) bus in Sioux Falls — pay cash or buy passes at City Hall. Rapid City Transit in Rapid City. No rail. A car is essential everywhere in South Dakota.",
+    "places": [
+      "Mount Rushmore",
+      "Badlands National Park",
+      "Custer State Park",
+      "Wind Cave National Park"
+    ],
+    "photo": {
+      "file": "mount_rushmore_sd.webp",
+      "location": "Mount Rushmore"
+    }
+  },
+  {
+    "abbr": "TN",
+    "fips": "47",
+    "name": "Tennessee",
+    "cities": [
+      "Nashville",
+      "Memphis",
+      "Knoxville",
+      "Chattanooga"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,100–$1,700",
+    "climate": "Humid subtropical — hot summers, mild winters",
+    "tempRange": "Summer 28–33°C · Winter 0–10°C",
+    "publicTransport": "limited",
+    "transitInfo": "WeGo bus and the Music City Star commuter rail in Nashville — buy a WeGo Smart Card at WeGo Central or transit centers. MATA bus and trolleys in Memphis. A car is recommended for most areas beyond downtown.",
+    "places": [
+      "Great Smoky Mountains National Park",
+      "Nashville Broadway district",
+      "Dollywood",
+      "Graceland Memphis"
+    ],
+    "photo": {
+      "file": "nashville_tennessee.webp",
+      "location": "Nashville"
+    }
+  },
+  {
+    "abbr": "TX",
+    "fips": "48",
+    "name": "Texas",
+    "cities": [
+      "Austin",
+      "Houston",
+      "Dallas",
+      "College Station",
+      "San Antonio"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,200–$2,000",
+    "climate": "Varies: hot/humid in Houston to semi-arid in West TX",
+    "tempRange": "Summer 35–40°C · Winter 3–15°C",
+    "publicTransport": "limited",
+    "transitInfo": "CapMetro bus + MetroRail in Austin (CapMetro app), DART bus + light rail in Dallas (GoPass app), Houston Metro bus + light rail (Q card), VIA in San Antonio. Buy regional cards at transit centers or via apps. A car is still highly recommended.",
+    "places": [
+      "Big Bend National Park",
+      "San Antonio River Walk",
+      "Padre Island National Seashore",
+      "Austin 6th Street",
+      "Guadalupe Mountains"
+    ],
+    "photo": {
+      "file": "houston_tx.webp",
+      "location": "Houston"
+    }
+  },
+  {
+    "abbr": "UT",
+    "fips": "49",
+    "name": "Utah",
+    "cities": [
+      "Salt Lake City",
+      "Provo",
+      "Logan",
+      "Ogden"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,100–$1,700",
+    "climate": "Semi-arid — cold winters, hot dry summers",
+    "tempRange": "Summer 28–35°C · Winter −5 to 5°C",
+    "publicTransport": "good",
+    "transitInfo": "UTA TRAX light rail (4 lines), FrontRunner commuter rail (Ogden to Provo), and bus throughout Salt Lake City — use the UTA GoRide app or buy an electronic fare card at station kiosks. Tap on/off at platform validators.",
+    "places": [
+      "Zion National Park",
+      "Bryce Canyon",
+      "Arches National Park",
+      "Canyonlands",
+      "Monument Valley"
+    ],
+    "photo": {
+      "file": "arches_national_park_utah.webp",
+      "location": "Arches NP"
+    }
+  },
+  {
+    "abbr": "VT",
+    "fips": "50",
+    "name": "Vermont",
+    "cities": [
+      "Burlington",
+      "Middlebury",
+      "Montpelier"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$1,100–$1,600",
+    "climate": "Humid continental — very cold snowy winters, mild summers",
+    "tempRange": "Summer 20–27°C · Winter −15 to −3°C",
+    "publicTransport": "poor",
+    "transitInfo": "Green Mountain Transit (GMT) bus in Burlington and Montpelier — pay cash or buy passes at GMT offices. Amtrak Vermonter runs once daily to NYC (~7 hrs). A car is essential outside Burlington.",
+    "places": [
+      "Green Mountain National Forest",
+      "Burlington waterfront",
+      "Stowe ski resort",
+      "Vermont Fall Foliage Drive"
+    ],
+    "photo": {
+      "file": "stowe_vermont.webp",
+      "location": "Stowe"
+    }
+  },
+  {
+    "abbr": "VA",
+    "fips": "51",
+    "name": "Virginia",
+    "cities": [
+      "Charlottesville",
+      "Blacksburg",
+      "Fairfax",
+      "Richmond",
+      "Norfolk"
+    ],
+    "colTier": "high",
+    "monthlyRent": "$1,400–$2,200",
+    "climate": "Humid subtropical/continental — four distinct seasons",
+    "tempRange": "Summer 27–32°C · Winter −3 to 8°C",
+    "publicTransport": "good",
+    "transitInfo": "WMATA Metro accessible from Northern VA (use a SmarTrip card). VRE commuter rail runs Fredericksburg/Manassas to DC on weekdays. GRTC bus in Richmond, HRT bus and light rail in Norfolk. Use the WMATA or Transit app.",
+    "places": [
+      "Shenandoah National Park",
+      "Colonial Williamsburg",
+      "Arlington National Cemetery",
+      "Skyline Drive"
+    ],
+    "photo": {
+      "file": "richmond_va.webp",
+      "location": "Richmond"
+    }
+  },
+  {
+    "abbr": "WA",
+    "fips": "53",
+    "name": "Washington",
+    "cities": [
+      "Seattle",
+      "Pullman",
+      "Bellingham",
+      "Spokane"
+    ],
+    "colTier": "high",
+    "monthlyRent": "$1,600–$2,500",
+    "climate": "Oceanic — mild, very rainy winters, warm dry summers",
+    "tempRange": "Summer 20–27°C · Winter 2–8°C",
+    "publicTransport": "good",
+    "transitInfo": "King County Metro bus + Sound Transit Link light rail in Seattle — tap any contactless bank card or get an ORCA card ($5 at station vending machines, reloadable). Use the Sound Transit or One Bus Away app. Sounder commuter rail connects Tacoma and Everett to Seattle.",
+    "places": [
+      "Mount Rainier National Park",
+      "Olympic National Park",
+      "Pike Place Market Seattle",
+      "North Cascades"
+    ],
+    "photo": {
+      "file": "Seattle_wa.webp",
+      "location": "Seattle"
+    }
+  },
+  {
+    "abbr": "WV",
+    "fips": "54",
+    "name": "West Virginia",
+    "cities": [
+      "Morgantown",
+      "Huntington",
+      "Charleston"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$700–$1,000",
+    "climate": "Humid continental — cold winters, warm summers",
+    "tempRange": "Summer 23–28°C · Winter −5 to 5°C",
+    "publicTransport": "poor",
+    "transitInfo": "Mountain Line Transit in Morgantown (free for WVU students with ID) covers campus and downtown. NICE bus in Huntington. No rail transit. A car is essential for everything outside campus areas.",
+    "places": [
+      "New River Gorge National Park",
+      "Blackwater Falls State Park",
+      "Seneca Rocks",
+      "Harpers Ferry"
+    ],
+    "photo": {
+      "file": "new_river_gorge_bridge_wv.webp",
+      "location": "New River Gorge"
+    }
+  },
+  {
+    "abbr": "WI",
+    "fips": "55",
+    "name": "Wisconsin",
+    "cities": [
+      "Madison",
+      "Milwaukee",
+      "Green Bay",
+      "Oshkosh"
+    ],
+    "colTier": "moderate",
+    "monthlyRent": "$950–$1,400",
+    "climate": "Humid continental — very cold snowy winters, warm summers",
+    "tempRange": "Summer 23–28°C · Winter −15 to −3°C",
+    "publicTransport": "good",
+    "transitInfo": "Madison Metro Bus and Milwaukee County Transit (MCTS) — get a Hop Card in Madison (buy at Metro Transit office or online) or pay cash. Milwaukee also has a free downtown streetcar (The Hop). Use the Transit app for real-time arrivals.",
+    "places": [
+      "Door County",
+      "Wisconsin Dells",
+      "Apostle Islands",
+      "Milwaukee Art Museum"
+    ],
+    "photo": {
+      "file": "madison_wi.webp",
+      "location": "Madison"
+    }
+  },
+  {
+    "abbr": "WY",
+    "fips": "56",
+    "name": "Wyoming",
+    "cities": [
+      "Laramie",
+      "Cheyenne",
+      "Casper"
+    ],
+    "colTier": "affordable",
+    "monthlyRent": "$800–$1,200",
+    "climate": "Semi-arid — very cold winters, warm dry summers, high winds",
+    "tempRange": "Summer 20–28°C · Winter −15 to −2°C",
+    "publicTransport": "poor",
+    "transitInfo": "Laramie's JUMP bus and Cheyenne Transit Program offer very limited routes — pay cash onboard. No rail. A car is absolutely essential in Wyoming.",
+    "places": [
+      "Yellowstone National Park",
+      "Grand Teton National Park",
+      "Devils Tower",
+      "Flaming Gorge"
+    ],
+    "photo": {
+      "file": "shoshone_national_forest_wyoming.webp",
+      "location": "Shoshone Forest"
+    }
+  }
+]
