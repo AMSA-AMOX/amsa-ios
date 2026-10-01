@@ -1,0 +1,8 @@
+{
+  "images" : [
+    { "filename" : "header-logo@1x.png", "idiom" : "universal", "scale" : "1x" },
+    { "filename" : "header-logo@2x.png", "idiom" : "universal", "scale" : "2x" },
+    { "filename" : "header-logo@3x.png", "idiom" : "universal", "scale" : "3x" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}
