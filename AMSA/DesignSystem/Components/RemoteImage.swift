@@ -72,18 +72,23 @@ struct RemoteImage<Content: View>: View {
     }
 
     var body: some View {
-        content(phase)
-            .task(id: url) {
-                guard let url else { phase = .failure; return }
-                if let hit = ImagePipeline.shared.cached(url) { phase = .success(hit); return }
-                phase = .loading
-                do {
-                    phase = .success(try await ImagePipeline.shared.image(for: url))
-                } catch is CancellationError {
-                } catch {
-                    phase = .failure
-                }
+        ZStack {
+            // `.task` never runs on empty content, so a caller with no loading branch would never
+            // load. This zero-size anchor keeps the view alive without changing its size.
+            Color.clear.frame(width: 0, height: 0)
+            content(phase)
+        }
+        .task(id: url) {
+            guard let url else { phase = .failure; return }
+            if let hit = ImagePipeline.shared.cached(url) { phase = .success(hit); return }
+            phase = .loading
+            do {
+                phase = .success(try await ImagePipeline.shared.image(for: url))
+            } catch is CancellationError {
+            } catch {
+                phase = .failure
             }
+        }
     }
 }
 

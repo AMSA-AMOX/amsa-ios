@@ -19,6 +19,8 @@ struct Endpoint<Response: Decodable & Sendable>: Sendable {
     var body: JSONValue? = nil
     /// `true` = web `authFetch` (Bearer token); `false` = web plain `fetch` (no token).
     var authenticated: Bool = true
+    /// Sent instead of the session's token: for requests made after sign-out has cleared it.
+    var bearer: String? = nil
 }
 
 /// The bearer token, readable synchronously from any isolation domain so a
@@ -51,7 +53,7 @@ actor APIClient {
         request.httpMethod = endpoint.method.rawValue
         // The web helper always sends this header, even on GET.
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        let sentToken = endpoint.authenticated ? token : nil
+        let sentToken = endpoint.authenticated ? endpoint.bearer ?? token : nil
         if endpoint.authenticated, sentToken == nil {
             // authFetch: `if (!token) return Promise.reject({ message: "Not authenticated" })`
             throw APIError(status: 401, message: "Not authenticated", errorField: nil, body: nil)

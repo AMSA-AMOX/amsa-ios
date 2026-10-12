@@ -34,4 +34,8 @@ struct AppConfig: Sendable {
     func siteURL(_ path: String) -> URL {
         apiBaseURL.appending(path: path)
     }
+
+    /// Settings › Legal. The website must serve these pages.
+    var privacyPolicyURL: URL { siteURL("/privacy") }
+    var termsURL: URL { siteURL("/terms") }
 }

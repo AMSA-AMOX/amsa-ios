@@ -26,7 +26,7 @@ struct AdminVerificationView: View {
                 Color.clear
             }
         }
-        .onAppear { if !isAdmin { router.navigate(to: .profile()) } }
+        .onAppear { if !isAdmin { router.redirect(to: .profile()) } }
         .task(id: status) { if isAdmin { await load(status) } }
     }
 

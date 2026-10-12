@@ -10,25 +10,21 @@ struct CollegesView: View {
     @State private var filters = ResearchFilters.defaults
     @State private var compareIds: [Int] = Preferences.compareIds
     @State private var currentPage = 1
-    @State private var selectedState: String?
-    @State private var dropdown = DropdownController()
+    @State private var filtersOpen = false
+    @State private var compareOpen = false
+    @State private var searchExpanded = false
     @FocusState private var searchFocused: Bool
 
+    private var searchOpen: Bool { searchExpanded || !filters.searchQuery.isEmpty }
+
     var body: some View {
-        let filtered = filters.apply(to: store.colleges, selectedState: selectedState)
+        let filtered = filters.apply(to: store.colleges, selectedState: nil)
         let totalPages = max(1, Int(ceil(Double(filtered.count) / Double(Self.pageSize))))
         let start = min((currentPage - 1) * Self.pageSize, filtered.count)
         let display = filtered[start..<min(currentPage * Self.pageSize, filtered.count)]
 
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                topFilterBar.padding(.bottom, 20).zIndex(1)
-
-                if !store.loading, store.error.isEmpty {
-                    USMapView(colleges: store.colleges, selectedState: selectedState) { selectedState = $0 }
-                        .padding(.bottom, 24)
-                }
-
                 if store.loading {
                     VStack(spacing: 16) { ForEach(0..<5, id: \.self) { _ in cardSkeleton } }
                 } else if !store.error.isEmpty {
@@ -65,54 +61,99 @@ struct CollegesView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.top, 52)
-            .padding(.bottom, 32)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
         }
         .scrollDismissesKeyboard(.interactively)
-        .dropdownHost(dropdown)
+        .floatingBottomBar { bottomBar }
+        .sheet(isPresented: $filtersOpen) {
+            ChromeSheet(title: "Filters", onReset: filters.activeCount > 0 ? { resetFilters() } : nil) {
+                FiltersForm(filters: $filters, fieldOptions: ResearchFilters.fieldOptions(store.colleges))
+            }
+        }
+        .sheet(isPresented: $compareOpen, onDismiss: { compareIds = Preferences.compareIds }) {
+            CompareView(inSheet: true)
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(28)
+        }
         .onAppear { store.load() }
         .onChange(of: filters) { _, _ in currentPage = 1 }
-        .onChange(of: selectedState) { _, _ in currentPage = 1 }
     }
 
-    // MARK: Filter bar
+    // MARK: Bottom bar — filters · compare · search
 
-    private var topFilterBar: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SearchField(placeholder: "School, city, or state…", text: $filters.searchQuery, focused: $searchFocused)
-            Button {
-                dropdown.toggle("research-filters", placement: .belowLeading(offset: 40 + 8)) {
-                    FilterDropdownPanel(filters: $filters, fieldOptions: ResearchFilters.fieldOptions(store.colleges))
+    private var bottomBar: some View {
+        HStack(spacing: 10) {
+            ChromeCircleButton(systemImage: "line.3.horizontal.decrease", label: "Filters",
+                               active: filters.activeCount > 0) { filtersOpen = true }
+            if searchOpen {
+                ChromeSearchField(placeholder: "School, city, or state…", text: $filters.searchQuery,
+                                  focused: $searchFocused) {
+                    if filters.searchQuery.trimmed.isEmpty { closeSearch() }
                 }
-            } label: {
-                HStack(spacing: 6) {
-                    Icon("adjustments", size: 24).foregroundStyle(Palette.gray500)
-                    if filters.activeCount > 0 {
-                        Text("· \(filters.activeCount)").tw(.sm, .semibold).foregroundStyle(Palette.gray700)
-                    }
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .twBox(background: Palette.white, radius: TW.dashboardButtonRadius, border: Palette.gray300, borderWidth: 2)
+                .transition(.scale(scale: 0.9, anchor: .trailing).combined(with: .opacity))
+                ChromeCircleButton(systemImage: "xmark", label: "Cancel search") { closeSearch() }
+            } else {
+                compareButton
+                    .transition(.scale(scale: 0.9, anchor: .leading).combined(with: .opacity))
+                ChromeCircleButton(systemImage: "magnifyingglass", label: "Search") { openSearch() }
             }
-            .buttonStyle(.plain)
-            .dropdownAnchor("research-filters")
-            .accessibilityLabel("Filters")
         }
+    }
+
+    private var compareButton: some View {
+        Button { compareOpen = true } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "tablecells").font(.system(size: 15, weight: .semibold))
+                Text("Compare").tw(.px(15), .semibold)
+                if !compareIds.isEmpty {
+                    Text("\(compareIds.count)")
+                        .font(.custom(TW.Weight.bold.fontName, fixedSize: 12))
+                        .foregroundStyle(Palette.white)
+                        .padding(.horizontal, 6)
+                        .frame(minWidth: 22, minHeight: 22)
+                        .background(Capsule().fill(Palette.navy))
+                        .contentTransition(.numericText())
+                }
+            }
+            .foregroundStyle(Palette.gray800)
+            .frame(maxWidth: .infinity)
+            .frame(height: Chrome.bottomHeight)
+            .chromeSurface(Capsule())
+            .contentShape(Capsule())
+        }
+        .buttonStyle(ChromePressStyle())
+        .accessibilityLabel(compareIds.isEmpty ? "Compare" : "Compare, \(compareIds.count) schools")
+    }
+
+    private func openSearch() {
+        withAnimation(Chrome.spring) { searchExpanded = true }
+        searchFocused = true
+    }
+
+    private func closeSearch() {
+        searchFocused = false
+        withAnimation(Chrome.spring) {
+            filters.searchQuery = ""
+            searchExpanded = false
+        }
+    }
+
+    /// The sheet's Reset leaves the search text alone.
+    private func resetFilters() {
+        var reset = ResearchFilters.defaults
+        reset.searchQuery = filters.searchQuery
+        filters = reset
     }
 
     private func resultsHeader(count: Int, totalPages: Int) -> some View {
-        let scope = selectedState.map { " in \(StaticData.stateName($0) ?? $0)" } ?? " match your filters"
-        return HStack(alignment: .firstTextBaseline, spacing: 8) {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             (Text("\(count)").font(.custom(TW.Weight.semibold.fontName, fixedSize: 14)).foregroundColor(Palette.navy)
-                + Text(" school\(count != 1 ? "s" : "")\(scope) · page \(currentPage)/\(totalPages)"))
+                + Text(" school\(count != 1 ? "s" : "") match your filters · page \(currentPage)/\(totalPages)"))
                 .tw(.sm)
                 .foregroundStyle(Palette.gray500)
-            if filters.isFiltered(selectedState: selectedState) {
-                Button {
-                    filters = .defaults
-                    selectedState = nil
-                } label: {
+            if filters.isFiltered(selectedState: nil) {
+                Button { filters = .defaults } label: {
                     Text("Reset all").tw(.xs).underline().foregroundStyle(Palette.gray400)
                 }
                 .buttonStyle(.plain)
@@ -139,13 +180,9 @@ struct CollegesView: View {
     private var emptyState: some View {
         VStack(spacing: 0) {
             Text("No schools match").tw(.sm, .semibold).foregroundStyle(Palette.gray600).padding(.bottom, 4)
-            Text(selectedState.map { "No schools in \(StaticData.stateName($0) ?? $0) match your current filters." }
-                 ?? "Try loosening your filters — very few schools meet all criteria simultaneously.")
+            Text("Try loosening your filters — very few schools meet all criteria simultaneously.")
                 .tw(.xs).foregroundStyle(Palette.gray400).multilineTextAlignment(.center).padding(.bottom, 16)
-            Button {
-                filters = .defaults
-                selectedState = nil
-            } label: {
+            Button { filters = .defaults } label: {
                 Text("Reset all filters").tw(.xs, .semibold).foregroundStyle(Palette.navy)
                     .padding(.horizontal, 16).padding(.vertical, 8)
                     .overlay(RoundedRectangle(cornerRadius: TW.dashboardButtonRadius).strokeBorder(Palette.navy.opacity(0.2), lineWidth: 1))
@@ -188,75 +225,61 @@ struct CollegesView: View {
     }
 
     private func toggleCompare(_ id: Int) {
-        if let index = compareIds.firstIndex(of: id) { compareIds.remove(at: index) } else { compareIds.append(id) }
+        withAnimation(Chrome.spring) {
+            if let index = compareIds.firstIndex(of: id) { compareIds.remove(at: index) } else { compareIds.append(id) }
+        }
         Preferences.compareIds = compareIds
     }
 }
 
-// MARK: - Filter dropdown
+// MARK: - Filters sheet
 
-/// `absolute left-0 top-full mt-2 z-30 bg-white rounded-2xl border-2 border-gray-300 shadow-xl p-5
-/// w-[22rem] max-w-[calc(100vw-2rem)] max-h-[75vh] overflow-y-auto space-y-5`
-private struct FilterDropdownPanel: View {
+/// The research page's filter dropdown, shown in a bottom sheet.
+private struct FiltersForm: View {
     @Binding var filters: ResearchFilters
     let fieldOptions: [String]
 
     var body: some View {
-        FittingScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                group("Field of study") {
-                    WebSelect(options: [("Any field", "Any")] + fieldOptions.map { ($0, $0) }, selection: $filters.selectedField,
-                              style: selectStyle, showsChevron: true)
-                }
-                group("Sort by") {
-                    WebSelect(options: [("US News Ranking", "ranking"), ("Financial Accessibility Score", "affordability")],
-                              selection: $filters.sortBy, style: selectStyle, showsChevron: true)
-                }
-                group("School category") {
-                    WebSelect(options: [("National Universities", "national_universities"),
-                                        ("National Liberal Arts Colleges", "liberal_arts_colleges")],
-                              selection: $filters.schoolCategory, style: selectStyle, showsChevron: true)
-                }
-                group("Financial Aid") {
-                    VStack(spacing: 8) {
-                        FilterToggle(checked: $filters.offersAidOnly, label: "Only schools offering aid to internationals")
-                        FilterToggle(checked: $filters.meetsFullNeedOnly, label: "Meets 100% of demonstrated need")
-                        FilterToggle(checked: $filters.meritScholarshipsOnly, label: "Has merit scholarships for internationals")
-                    }
-                    FilterSlider(label: "Min % of internationals receiving aid", value: $filters.minAidPercent, range: 0...100,
-                                 step: 5, format: { "\(JSNumber.string($0))%" })
-                        .padding(.top, 12)
-                }
-                group("Cost") {
-                    VStack(spacing: 16) {
-                        FilterSlider(label: "Max Total Cost of Attendance", value: $filters.maxTotalCOA, range: 40_000...100_000,
-                                     step: 5_000, format: Formatters.money)
-                        FilterSlider(label: "Max Net Cost (after avg aid)", value: $filters.maxNetCost, range: 10_000...100_000,
-                                     step: 5_000, format: Formatters.money)
-                    }
-                }
-                group("International Profile") {
-                    FilterSlider(label: "Min % international students", value: $filters.minInternationalPercent, range: 0...30,
-                                 step: 1, format: { "\(JSNumber.string($0))%" })
-                }
-                group("Career") {
-                    FilterToggle(checked: $filters.stemOptOnly, label: "STEM OPT eligible programs only (36-month extension)")
-                }
-                Button { filters = .defaults } label: {
-                    Text("Reset all filters").tw(.sm, .semibold).foregroundStyle(Palette.gray600)
-                        .frame(maxWidth: .infinity).padding(.vertical, 8)
-                        .overlay(RoundedRectangle(cornerRadius: TW.dashboardButtonRadius).strokeBorder(Palette.gray300, lineWidth: 2))
-                }
-                .buttonStyle(.plain)
+        VStack(alignment: .leading, spacing: 20) {
+            group("Field of study") {
+                WebSelect(options: [("Any field", "Any")] + fieldOptions.map { ($0, $0) }, selection: $filters.selectedField,
+                          style: selectStyle, showsChevron: true)
             }
-            .padding(20)
+            group("Sort by") {
+                WebSelect(options: [("US News Ranking", "ranking"), ("Financial Accessibility Score", "affordability")],
+                          selection: $filters.sortBy, style: selectStyle, showsChevron: true)
+            }
+            group("School category") {
+                WebSelect(options: [("National Universities", "national_universities"),
+                                    ("National Liberal Arts Colleges", "liberal_arts_colleges")],
+                          selection: $filters.schoolCategory, style: selectStyle, showsChevron: true)
+            }
+            group("Financial Aid") {
+                VStack(spacing: 8) {
+                    FilterToggle(checked: $filters.offersAidOnly, label: "Only schools offering aid to internationals")
+                    FilterToggle(checked: $filters.meetsFullNeedOnly, label: "Meets 100% of demonstrated need")
+                    FilterToggle(checked: $filters.meritScholarshipsOnly, label: "Has merit scholarships for internationals")
+                }
+                FilterSlider(label: "Min % of internationals receiving aid", value: $filters.minAidPercent, range: 0...100,
+                             step: 5, format: { "\(JSNumber.string($0))%" })
+                    .padding(.top, 12)
+            }
+            group("Cost") {
+                VStack(spacing: 16) {
+                    FilterSlider(label: "Max Total Cost of Attendance", value: $filters.maxTotalCOA, range: 40_000...100_000,
+                                 step: 5_000, format: Formatters.money)
+                    FilterSlider(label: "Max Net Cost (after avg aid)", value: $filters.maxNetCost, range: 10_000...100_000,
+                                 step: 5_000, format: Formatters.money)
+                }
+            }
+            group("International Profile") {
+                FilterSlider(label: "Min % international students", value: $filters.minInternationalPercent, range: 0...30,
+                             step: 1, format: { "\(JSNumber.string($0))%" })
+            }
+            group("Career") {
+                FilterToggle(checked: $filters.stemOptOnly, label: "STEM OPT eligible programs only (36-month extension)")
+            }
         }
-        .frame(width: min(352, UIScreen.main.bounds.width - 32))
-        .frame(maxHeight: UIScreen.main.bounds.height * 0.75)
-        .background(RoundedRectangle(cornerRadius: TW.radius2xl).fill(Palette.white))
-        .clipShape(RoundedRectangle(cornerRadius: TW.radius2xl))
-        .overlay(RoundedRectangle(cornerRadius: TW.radius2xl).strokeBorder(Palette.gray300, lineWidth: 2))
-        .twShadow(.xl)
     }
 
     private var selectStyle: InputStyle {
@@ -266,7 +289,7 @@ private struct FilterDropdownPanel: View {
 
     private func group<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.uppercased()).tw(.xs, .bold, tracking: .wider).foregroundStyle(Palette.gray400)
+            SheetSectionLabel(title)
             content()
         }
     }
@@ -371,18 +394,21 @@ private struct CollegeCard: View {
                 }
             }
             statGrid.padding(.top, 12)
+            // A pair: same shape and size, filled vs. outlined.
+            let buttonShape = RoundedRectangle(cornerRadius: TW.dashboardButtonRadius)
             HStack(spacing: 12) {
                 Spacer()
                 Button(action: onToggleCompare) {
                     Text(compared ? "Remove Compare" : "Compare").tw(.sm, .semibold).foregroundStyle(Palette.white)
                         .padding(.horizontal, 12).padding(.vertical, 6)
-                        .background(RoundedRectangle(cornerRadius: TW.dashboardButtonRadius).fill(Palette.navy))
+                        .background(buttonShape.fill(Palette.navy))
                 }
                 .buttonStyle(.plain)
                 Button(action: onDetail) {
                     Text("View Detail").tw(.sm, .semibold).foregroundStyle(Palette.navy)
                         .padding(.horizontal, 12).padding(.vertical, 6)
-                        .overlay(RoundedRectangle(cornerRadius: TW.radiusLg).strokeBorder(Palette.navy.opacity(0.25), lineWidth: 1))
+                        .background(buttonShape.fill(Palette.white))
+                        .overlay(buttonShape.strokeBorder(Palette.navy, lineWidth: 1))
                 }
                 .buttonStyle(.plain)
             }

@@ -1,88 +1,13 @@
 [
   {
-    "name": "nav-profile",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M17.982 18.725"
-  },
-  {
-    "name": "nav-feed",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M19.5 12.75h-15m15-5.25h-15m15 10.5h-15"
-  },
-  {
-    "name": "nav-notifications",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M14.857 17.082"
-  },
-  {
-    "name": "nav-membership",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18"
-  },
-  {
-    "name": "nav-places",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25"
-  },
-  {
     "name": "nav-colleges",
     "file": "components/DashboardSidebar.tsx",
     "match": "M4.26 10.147a60.438"
   },
   {
-    "name": "nav-compare",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M3 5.25h6.75V21H3V5.25Z"
-  },
-  {
-    "name": "nav-threads",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18"
-  },
-  {
-    "name": "nav-network",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M18 18.72a9.094"
-  },
-  {
-    "name": "nav-verification",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M9 12.75 11.25 15 15 9.75m6 2.25a9 9 0 1 1-18 0"
-  },
-  {
-    "name": "nav-post-approval",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M9 12.75 11.25 15 15 9.75m-9-5.25h12"
-  },
-  {
-    "name": "nav-thread-approval",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M9 12.75 11.25 15 15 9.75M21 12c0 1.268"
-  },
-  {
-    "name": "signout",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M15.75 9V5.25A2.25"
-  },
-  {
-    "name": "settings",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M9.594 3.94c.09-.542"
-  },
-  {
-    "name": "menu",
-    "file": "components/DashboardSidebar.tsx",
-    "match": "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-  },
-  {
     "name": "close",
     "file": "components/DashboardSidebar.tsx",
     "match": "M6 18 18 6M6 6l12 12"
-  },
-  {
-    "name": "feedback",
-    "file": "components/FeedbackButton.tsx",
-    "match": "M8.625 12a.375.375"
   },
   {
     "name": "check-bold",
@@ -113,11 +38,6 @@
     "name": "eye",
     "file": "app/(main)/login/page.tsx",
     "match": "M2.036 12.322a1.012"
-  },
-  {
-    "name": "adjustments",
-    "file": "app/(dashboard)/dashboard/feed/page.tsx",
-    "match": "M10.5 6h9.75M10.5 6a1.5"
   },
   {
     "name": "ellipsis",
@@ -216,19 +136,9 @@
     "match": "m21 21-5.197-5.197m0 0A7.5"
   },
   {
-    "name": "chevron-left",
-    "file": "app/(dashboard)/dashboard/network/[id]/page.tsx",
-    "match": "m15.75 19.5-7.5-7.5 7.5-7.5"
-  },
-  {
     "name": "plus",
     "file": "app/(dashboard)/dashboard/network/[id]/page.tsx",
     "match": "M12 4.5v15m7.5-7.5h-15"
-  },
-  {
-    "name": "search-lg",
-    "file": "app/(dashboard)/dashboard/network/page.tsx",
-    "match": "m21 21-4.35-4.35m0 0A7.5"
   },
   {
     "name": "brand-x",
@@ -292,11 +202,6 @@
     "name": "chevron-right-2",
     "file": "app/(dashboard)/dashboard/places/page.tsx",
     "match": "m8.25 4.5 7.5 7.5-7.5 7.5"
-  },
-  {
-    "name": "chevron-left-thick",
-    "file": "app/(dashboard)/dashboard/places/[abbr]/page.tsx",
-    "match": "M15 18l-6-6 6-6"
   },
   {
     "name": "external-link",

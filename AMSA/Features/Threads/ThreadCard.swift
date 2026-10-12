@@ -7,6 +7,7 @@ struct ThreadCard: View {
     let onDeleted: (Int) -> Void
 
     @Environment(SessionStore.self) private var session
+    @Environment(SafetyStore.self) private var safety
     @Environment(DropdownController.self) private var dropdown
 
     @State private var upvoteCount: Int
@@ -25,6 +26,15 @@ struct ThreadCard: View {
     @State private var replyingToId: Int?
     @State private var replyDraft = ""
     @State private var replySubmitting = false
+    @State private var reportRequest: ReportRequest?
+    @State private var blockCandidate: BlockCandidate?
+
+    /// Anonymous threads hide the asker, so they're never "mine" here; the server refuses self-reports.
+    private var isMine: Bool { thread.asker?.id != nil && thread.asker?.id == session.user?.id }
+    private var askerCandidate: BlockCandidate? {
+        guard !thread.isAnon, let asker = thread.asker, !isMine else { return nil }
+        return BlockCandidate(id: asker.id, name: asker.fullName.nilIfEmpty ?? "this member")
+    }
 
     init(thread: HubThread, isAdmin: Bool, onDeleted: @escaping (Int) -> Void) {
         self.thread = thread
@@ -66,6 +76,8 @@ struct ThreadCard: View {
             Button("Cancel", role: .cancel) {}
             Button("OK", role: .destructive) { performDelete() }
         }
+        .reportSheet($reportRequest)
+        .blockConfirmation($blockCandidate)
     }
 
     // MARK: Header
@@ -86,7 +98,7 @@ struct ThreadCard: View {
                 HStack(spacing: 8) {
                     Text(RelativeTime.agoMonth.format(thread.approvedAt ?? thread.createdAt))
                         .tw(.xs).foregroundStyle(Palette.gray400)
-                    if isAdmin { menuButton }
+                    if isAdmin || !isMine { menuButton }
                 }
                 .fixedSize()
             }
@@ -97,24 +109,36 @@ struct ThreadCard: View {
         let id = "thread-menu-\(thread.id)"
         return Button {
             dropdown.toggle(id, placement: .belowTrailing(offset: 28)) {
-                DropdownCard(width: 144) {
-                    Button {
-                        dropdown.close()
-                        confirmDelete = true
-                    } label: {
-                        HStack(spacing: 10) {
-                            Icon("trash", size: 16)
-                            Text(deleting ? "Deleting…" : "Delete").tw(.sm)
-                            Spacer(minLength: 0)
+                DropdownCard(width: 184) {
+                    if !isMine {
+                        menuRow(systemImage: "flag", label: "Report", color: Palette.gray700) {
+                            reportRequest = ReportRequest(target: .hubThread(thread.id), author: askerCandidate)
                         }
-                        .foregroundStyle(Palette.red500)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
-                    .disabled(deleting)
-                    .opacity(deleting ? 0.5 : 1)
+                    if let candidate = askerCandidate {
+                        menuRow(systemImage: "hand.raised", label: "Block \(candidate.firstName)", color: Palette.red500) {
+                            blockCandidate = candidate
+                        }
+                    }
+                    if isAdmin {
+                        Button {
+                            dropdown.close()
+                            confirmDelete = true
+                        } label: {
+                            HStack(spacing: 10) {
+                                Icon("trash", size: 16)
+                                Text(deleting ? "Deleting…" : "Delete").tw(.sm)
+                                Spacer(minLength: 0)
+                            }
+                            .foregroundStyle(Palette.red500)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(deleting)
+                        .opacity(deleting ? 0.5 : 1)
+                    }
                 }
             }
         } label: {
@@ -123,6 +147,24 @@ struct ThreadCard: View {
         .buttonStyle(.plain)
         .dropdownAnchor(id)
         .accessibilityLabel("More")
+    }
+
+    private func menuRow(systemImage: String, label: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button {
+            dropdown.close()
+            action()
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: systemImage).font(.system(size: 14, weight: .medium)).frame(width: 16)
+                Text(label).tw(.sm).lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(color)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: Footer
@@ -172,7 +214,7 @@ struct ThreadCard: View {
             }
             if !commentsLoading, !comments.isEmpty {
                 VStack(alignment: .leading, spacing: 20) {
-                    ForEach(comments) { comment in commentView(comment) }
+                    ForEach(comments.filter { !safety.isHidden($0.author?.id) }) { comment in commentView(comment) }
                 }
             }
         }
@@ -208,7 +250,7 @@ struct ThreadCard: View {
             }
             if !c.replies.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
-                    ForEach(c.replies) { r in
+                    ForEach(c.replies.filter { !safety.isHidden($0.author?.id) }) { r in
                         HStack(alignment: .top, spacing: 12) {
                             commentAvatar(r, size: 28)
                             VStack(alignment: .leading, spacing: 0) {
@@ -240,6 +282,12 @@ struct ThreadCard: View {
         HStack(spacing: 8) {
             Text(c.authorName).tw(.sm, .semibold).foregroundStyle(Palette.gray800)
             Text(RelativeTime.agoMonth.format(c.createdAt)).tw(.xs).foregroundStyle(Palette.gray400)
+            Spacer(minLength: 0)
+            if c.author?.id == nil || c.author?.id != session.user?.id {
+                let author = c.isAnon ? nil : c.author.map { BlockCandidate(id: $0.id, name: $0.fullName.nilIfEmpty ?? "this member") }
+                SafetyMenu(report: ReportRequest(target: .hubComment(c.id), author: author),
+                           onReport: { reportRequest = $0 }, onBlock: { blockCandidate = $0 }, size: 14)
+            }
         }
     }
 

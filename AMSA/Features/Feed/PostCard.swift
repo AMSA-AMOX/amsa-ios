@@ -14,6 +14,8 @@ struct PostCard: View {
     var onDelete: ((Int) -> Void)? = nil
     var deleting: Bool = false
     var onReport: ((Int) -> Void)? = nil
+    /// Not ported: blocks the author (App Store Guideline 1.2).
+    var onBlock: ((BlockCandidate) -> Void)? = nil
 
     @Environment(Router.self) private var router
     @Environment(DropdownController.self) private var dropdown
@@ -87,7 +89,7 @@ struct PostCard: View {
                         .disabled(followingInProgress)
                         .opacity(followingInProgress ? 0.5 : 1)
                     }
-                    if onDelete != nil || onReport != nil { menuButton }
+                    if onDelete != nil || onReport != nil || blockCandidate != nil { menuButton }
                 }
                 .fixedSize()
             }
@@ -115,8 +117,13 @@ struct PostCard: View {
         .accessibilityLabel("More")
     }
 
+    private var blockCandidate: BlockCandidate? {
+        guard onBlock != nil, let author = post.author else { return nil }
+        return BlockCandidate(id: author.id, name: "\(author.firstName ?? "") \(author.lastName ?? "")".trimmed.nilIfEmpty ?? "this member")
+    }
+
     private var menu: some View {
-        DropdownCard(width: 144) {
+        DropdownCard(width: blockCandidate == nil ? 144 : 184) {
             if let onDelete {
                 Button {
                     dropdown.close()
@@ -135,6 +142,23 @@ struct PostCard: View {
                     onReport(post.id)
                 } label: {
                     menuRow(icon: "flag", iconColor: Palette.gray400, label: "Report", color: Palette.gray700)
+                }
+                .buttonStyle(.plain)
+            }
+            if let onBlock, let candidate = blockCandidate {
+                Button {
+                    dropdown.close()
+                    onBlock(candidate)
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "hand.raised").font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(Palette.red500).frame(width: 16)
+                        Text("Block \(candidate.firstName)").tw(.sm).foregroundStyle(Palette.red500).lineLimit(1)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
             }

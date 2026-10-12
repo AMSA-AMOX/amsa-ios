@@ -17,7 +17,7 @@ struct PlaceDetailView: View {
         ScrollView {
             if let info {
                 VStack(alignment: .leading, spacing: 0) {
-                    details(info).padding(24)
+                    details(info).padding(.horizontal, 24).padding(.top, 8).padding(.bottom, 24)
                     ReviewsColumn(config: .place(abbr: info.abbr, stateName: info.name))
                 }
             } else {
@@ -39,16 +39,6 @@ struct PlaceDetailView: View {
 
     private func details(_ info: StateInfo) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Button { router.back(to: .places) } label: {
-                HStack(spacing: 6) {
-                    Icon("chevron-left-thick", size: 16)
-                    Text("Back to Places").tw(.sm)
-                }
-                .foregroundStyle(Palette.gray500)
-            }
-            .buttonStyle(.plain)
-            .padding(.bottom, 20)
-
             FlowLayout(spacing: 12) {
                 Text(info.name).tw(.x2l, .bold).foregroundStyle(Palette.navy)
                 let (bg, fg, border) = info.colTier.colors
@@ -237,9 +227,14 @@ private struct PlacePhotoCard: View {
                                               captionLink: photo.photographerUrl.map { (label: photo.photographer ?? "", url: $0) },
                                               captionSuffix: " on Pexels")
                     } label: {
-                        RemoteImage(photo.thumb) { phase in
-                            if let image = phase.image { Image(uiImage: image).resizable().scaledToFill() }
+                        // object-cover inside the 16:9 box; the overlay keeps the photo from resizing it.
+                        Color.clear.overlay {
+                            RemoteImage(photo.thumb) { phase in
+                                if let image = phase.image { Image(uiImage: image).resizable().scaledToFill() }
+                            }
                         }
+                        .clipped()
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 } else {

@@ -105,6 +105,8 @@ struct NetworkProfileResponse: Decodable, Sendable {
         var followersCount: Int?
         let followingCount: Int?
         var isFollowing: Bool?
+        /// The viewer blocked this member (servers before website-changes/ omit it).
+        var blockedByMe: Bool?
 
         var displayName: String { "\(firstName ?? "") \(lastName ?? "")".trimmed }
     }

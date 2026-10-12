@@ -106,90 +106,54 @@ struct PlacesView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                VStack(alignment: .leading, spacing: 12) {
-                    SearchField(placeholder: "Search states…", text: $search, focused: $searchFocused)
-                    filterButton
-                        .overlay(alignment: .topLeading) {
-                            if filterOpen { filterPanel.offset(y: 48) }
-                        }
-                        .zIndex(1)
-                }
-                .padding(.bottom, 20)
-                .zIndex(1)
-
-                StateCarousel(states: filtered, counts: studentCounts) { abbr in
-                    router.navigate(to: .placeDetail(abbr: abbr))
-                }
+            StateCarousel(states: filtered, counts: studentCounts) { abbr in
+                router.navigate(to: .placeDetail(abbr: abbr))
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 24)
+            .padding(.bottom, 16)
         }
         .scrollDismissesKeyboard(.interactively)
+        .floatingBottomBar {
+            HStack(spacing: 10) {
+                ChromeCircleButton(systemImage: "line.3.horizontal.decrease", label: "Filters",
+                                   active: !colTiers.isEmpty || !transit.isEmpty) { filterOpen = true }
+                ChromeSearchField(placeholder: "Search states…", text: $search, focused: $searchFocused)
+            }
+        }
+        .sheet(isPresented: $filterOpen) { filterSheet }
         .task {
             studentCounts = (try? await session.api.send(PlacesAPI.studentCounts()))?.counts ?? [:]
         }
     }
 
-    private var filterButton: some View {
-        Button { filterOpen.toggle() } label: {
-            HStack(spacing: 6) {
-                Icon("adjustments", size: 24).foregroundStyle(Palette.gray500)
-                if !colTiers.isEmpty || !transit.isEmpty {
-                    Text("· \(colTiers.count + transit.count)").tw(.sm, .semibold).foregroundStyle(Palette.gray700)
+    private var filterSheet: some View {
+        ChromeSheet(title: "Filters", onReset: colTiers.isEmpty && transit.isEmpty ? nil : {
+            colTiers = []
+            transit = []
+        }) {
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 8) {
+                    SheetSectionLabel("Cost of living")
+                    FlowLayout(spacing: 6) {
+                        ForEach(StateInfo.CostTier.allCases, id: \.self) { tier in
+                            FilterChip(label: tier.label, selected: colTiers.contains(tier)) {
+                                if colTiers.contains(tier) { colTiers.remove(tier) } else { colTiers.insert(tier) }
+                            }
+                        }
+                    }
                 }
-            }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .twBox(background: Palette.white, radius: TW.dashboardButtonRadius, border: Palette.gray300, borderWidth: 2)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Filters")
-    }
-
-    /// `absolute left-0 top-full mt-2 z-20 bg-white rounded-2xl border-2 border-gray-200 shadow-xl p-5 w-80`
-    /// (the web panel only closes from its button).
-    private var filterPanel: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("COST OF LIVING").tw(.xs, .semibold, tracking: .wide).foregroundStyle(Palette.gray400)
-                FlowLayout(spacing: 6) {
-                    ForEach(StateInfo.CostTier.allCases, id: \.self) { tier in
-                        FilterChip(label: tier.label, selected: colTiers.contains(tier)) {
-                            if colTiers.contains(tier) { colTiers.remove(tier) } else { colTiers.insert(tier) }
+                VStack(alignment: .leading, spacing: 8) {
+                    SheetSectionLabel("Public transit")
+                    FlowLayout(spacing: 6) {
+                        ForEach(StateInfo.Transit.allCases, id: \.self) { rating in
+                            FilterChip(label: rating.filterLabel, selected: transit.contains(rating)) {
+                                if transit.contains(rating) { transit.remove(rating) } else { transit.insert(rating) }
+                            }
                         }
                     }
                 }
             }
-            .padding(.bottom, 16)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("PUBLIC TRANSIT").tw(.xs, .semibold, tracking: .wide).foregroundStyle(Palette.gray400)
-                FlowLayout(spacing: 6) {
-                    ForEach(StateInfo.Transit.allCases, id: \.self) { rating in
-                        FilterChip(label: rating.filterLabel, selected: transit.contains(rating)) {
-                            if transit.contains(rating) { transit.remove(rating) } else { transit.insert(rating) }
-                        }
-                    }
-                }
-            }
-            if !colTiers.isEmpty || !transit.isEmpty {
-                Button {
-                    colTiers = []
-                    transit = []
-                } label: {
-                    Text("Clear all").tw(.sm, .semibold).foregroundStyle(Palette.gray600)
-                        .frame(maxWidth: .infinity).padding(.vertical, 8)
-                        .overlay(RoundedRectangle(cornerRadius: TW.dashboardButtonRadius).strokeBorder(Palette.gray200, lineWidth: 2))
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 16)
-            }
         }
-        .padding(20)
-        .frame(width: 320)
-        .background(RoundedRectangle(cornerRadius: TW.radius2xl).fill(Palette.white))
-        .overlay(RoundedRectangle(cornerRadius: TW.radius2xl).strokeBorder(Palette.gray200, lineWidth: 2))
-        .twShadow(.xl)
     }
 }
 

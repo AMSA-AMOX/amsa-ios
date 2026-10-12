@@ -84,4 +84,38 @@ struct DecodingTests {
         let object = try #require(JSONSerialization.jsonObject(with: JSONEncoder().encode(stored)) as? [String: Any])
         #expect(Set(object.keys) == ["token", "user"])
     }
+
+    @Test func termsAndReportsAreOptionalForOlderServers() throws {
+        // Older servers send neither field; newer ones send both.
+        let old = try Fixture.decode(AuthUser.self, """
+        {"id": 1, "email": "x@y.z", "role": "member", "roles": ["member"], "firstName": "X", "lastName": "Y",
+         "acceptanceStatus": "approved"}
+        """)
+        #expect(old.termsAcceptedAt == nil)
+        let new = try Fixture.decode(AuthUser.self, """
+        {"id": 1, "email": "x@y.z", "role": "member", "roles": ["member"], "firstName": "X", "lastName": "Y",
+         "acceptanceStatus": "approved", "termsAcceptedAt": "2026-10-02T00:00:00.000Z"}
+        """)
+        #expect(new.termsAcceptedAt == "2026-10-02T00:00:00.000Z")
+
+        let shell = try Fixture.decode(ShellData.self, """
+        {"membershipStatus": null, "unseenNotifications": 2, "pending": {"posts": 1, "threads": 0, "verification": 0}}
+        """)
+        #expect(shell.pending.reports == nil)
+        let shellWithReports = try Fixture.decode(ShellData.self, """
+        {"membershipStatus": null, "unseenNotifications": 0,
+         "pending": {"posts": 0, "threads": 0, "verification": 0, "reports": 3}}
+        """)
+        #expect(shellWithReports.pending.reports == 3)
+    }
+
+    @Test func reportTargetsMatchTheServer() {
+        // `REPORT_TARGET_TYPES` in website-changes/src/lib/reports.ts; review ids are uuids.
+        #expect(ReportTarget.post(5).type == "post" && ReportTarget.post(5).id == "5")
+        #expect(ReportTarget.hubComment(9).type == "hub_comment")
+        #expect(ReportTarget.collegeReview("a-b").type == "college_review" && ReportTarget.collegeReview("a-b").id == "a-b")
+        #expect(ReportTarget.question(2).type == "question")
+        #expect(ReportReason.selfHarm.rawValue == "self_harm")
+        #expect(ReportReason.allCases.count == 8)
+    }
 }

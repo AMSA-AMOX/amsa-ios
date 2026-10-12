@@ -16,6 +16,8 @@ enum AuthAPI {
             "firstName": .string(firstName),
             "lastName": .string(lastName),
             "turnstileToken": .string(turnstileToken),
+            // Signup is refused without it; the form only submits once the box is checked.
+            "acceptedTerms": .bool(true),
         ], authenticated: false)
     }
 

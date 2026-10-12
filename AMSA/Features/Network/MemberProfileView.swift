@@ -6,6 +6,7 @@ struct MemberProfileView: View {
 
     @Environment(SessionStore.self) private var session
     @Environment(Router.self) private var router
+    @Environment(SafetyStore.self) private var safety
 
     enum Tab: Hashable { case profile, posts, threads }
 
@@ -25,6 +26,14 @@ struct MemberProfileView: View {
     @State private var askOpen = false
     @State private var questionMessage: (text: String, ok: Bool)?
     @State private var dropdown = DropdownController()
+    @State private var reportRequest: ReportRequest?
+    @State private var blockCandidate: BlockCandidate?
+    @State private var unblocking = false
+
+    private var memberCandidate: BlockCandidate? {
+        profile.map { BlockCandidate(id: $0.id, name: $0.displayName.nilIfEmpty ?? "this member") }
+    }
+    private var isBlocked: Bool { profile?.blockedByMe == true || safety.isHidden(profile?.id) }
 
     private var visibleRoles: [String] {
         let roles = (profile?.roles?.isEmpty == false) ? profile?.roles ?? [] : [profile?.role ?? ""]
@@ -32,7 +41,7 @@ struct MemberProfileView: View {
     }
 
     private var canAskQuestion: Bool {
-        guard session.role == Role.member, let profile, profile.id != session.user?.id else { return false }
+        guard session.role == Role.member, let profile, profile.id != session.user?.id, !isBlocked else { return false }
         return profile.roles?.contains { [Role.ambassador, Role.usMember, Role.boardMember].contains($0) } ?? false
     }
 
@@ -58,6 +67,8 @@ struct MemberProfileView: View {
         }
         .environment(dropdown)
         .dropdownHost(dropdown)
+        .reportSheet($reportRequest)
+        .blockConfirmation($blockCandidate) { _ in profile?.blockedByMe = true }
         .task { await loadProfile() }
         .webModal(isPresented: $askOpen, backdropOpacity: 0.4) {
             if let profile {
@@ -78,8 +89,6 @@ struct MemberProfileView: View {
 
     private var compactHeader: some View {
         VStack(alignment: .leading, spacing: 0) {
-            BackLink(title: "Back to Network") { router.back(to: .network) }
-                .padding(.bottom, 12)
             if !loadingProfile, let profile {
                 HStack(alignment: .top, spacing: 16) {
                     Avatar(imageURL: profile.profilePic, initials: .initials(profile.firstName, profile.lastName),
@@ -102,11 +111,35 @@ struct MemberProfileView: View {
                             Text(school).tw(.sm).foregroundStyle(Palette.gray500).padding(.top, 4)
                         }
                         if profile.id != session.user?.id {
-                            OutlineButton(title: profile.isFollowing == true ? "Following" : "Follow",
-                                          horizontalPadding: 12, verticalPadding: 6, disabled: followInFlight,
-                                          action: toggleFollow)
-                                .padding(.top, 8)
+                            if isBlocked {
+                                OutlineButton(title: unblocking ? "Unblocking…" : "Unblock", horizontalPadding: 12,
+                                              verticalPadding: 6, disabled: unblocking, action: unblock)
+                                    .padding(.top, 8)
+                            } else {
+                                OutlineButton(title: profile.isFollowing == true ? "Following" : "Follow",
+                                              horizontalPadding: 12, verticalPadding: 6, disabled: followInFlight,
+                                              action: toggleFollow)
+                                    .padding(.top, 8)
+                            }
                         }
+                    }
+                    Spacer(minLength: 0)
+                    if profile.id != session.user?.id, let candidate = memberCandidate {
+                        Menu {
+                            Button { reportRequest = ReportRequest(target: .user(profile.id), author: candidate) } label: {
+                                Label("Report \(candidate.firstName)", systemImage: "flag")
+                            }
+                            if isBlocked {
+                                Button { unblock() } label: { Label("Unblock \(candidate.firstName)", systemImage: "hand.raised.slash") }
+                            } else {
+                                Button(role: .destructive) { blockCandidate = candidate } label: {
+                                    Label("Block \(candidate.firstName)", systemImage: "hand.raised")
+                                }
+                            }
+                        } label: {
+                            Icon("ellipsis", size: 18).foregroundStyle(Palette.gray500).padding(6).contentShape(Rectangle())
+                        }
+                        .accessibilityLabel("More")
                     }
                 }
                 let social = SocialLinksList(x: profile.x, linkedin: profile.linkedin, instagram: profile.instagram,
@@ -222,7 +255,10 @@ struct MemberProfileView: View {
             } else {
                 ForEach(posts) { post in
                     PostCard(post: post, onAppreciate: appreciate, appreciating: appreciating.contains(post.id),
-                             showAuthor: true, authorClickable: false)
+                             showAuthor: true, authorClickable: false,
+                             onReport: post.author?.id == session.user?.id ? nil : { _ in
+                                 reportRequest = ReportRequest(target: .post(post.id), author: memberCandidate)
+                             })
                 }
             }
         }
@@ -328,6 +364,15 @@ struct MemberProfileView: View {
                 }
             }
             appreciating.remove(postId)
+        }
+    }
+
+    private func unblock() {
+        guard let id = profile?.id else { return }
+        unblocking = true
+        Task {
+            if (try? await safety.unblock(id)) != nil { profile?.blockedByMe = false }
+            unblocking = false
         }
     }
 

@@ -34,6 +34,8 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: $(AMSA_DEVELOPMENT_TEAM)
+        # Push notifications; off until Config/Base.xcconfig points it at AMSA/AMSA.entitlements.
+        CODE_SIGN_ENTITLEMENTS: $(AMSA_CODE_SIGN_ENTITLEMENTS)
         ENABLE_PREVIEWS: YES
     info:
       path: AMSA/Info.plist
@@ -43,8 +45,10 @@ targets:
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
         LSRequiresIPhoneOS: true
+        # Rendered from assets/splash.svg (logo + "EST. 2011"), centred on white.
         UILaunchScreen:
           UIColorName: LaunchBackground
+          UIImageName: Splash
         UIRequiresFullScreen: true
         # The web has no dark mode; the app mirrors it.
         UIUserInterfaceStyle: Light

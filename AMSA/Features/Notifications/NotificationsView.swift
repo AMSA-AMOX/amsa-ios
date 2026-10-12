@@ -24,6 +24,15 @@ struct NotificationsView: View {
 
     @State private var items: [NotificationItem] = []
     @State private var loadingItems = true
+    /// `amsa_notif_seen` as it was when the screen opened, before `load()` advances it. Whatever is
+    /// newer stays marked new for the rest of this visit.
+    @State private var seenBefore = ISODate.parse(Preferences.notificationsSeen)
+
+    /// The shell's unseen count: `happened_at > coalesce(seenAfter, '-infinity')`.
+    private func isNew(_ item: NotificationItem) -> Bool {
+        guard let date = ISODate.parse(item.happenedAt) else { return false }
+        return seenBefore.map { date > $0 } ?? true
+    }
 
     private var grouped: (today: [NotificationItem], earlier: [NotificationItem]) {
         let startToday = Calendar.current.startOfDay(for: .now)
@@ -68,9 +77,11 @@ struct NotificationsView: View {
         do {
             let list = try await session.api.send(NotificationsAPI.list()).notifications ?? []
             items = list
-            // Mark as seen with the newest server timestamp (not the client clock).
+            // Mark as seen with the newest server timestamp (not the client clock), one millisecond past
+            // it: happenedAt has microseconds (e.g. a follow at …00.123456) but this string only keeps
+            // milliseconds, and the shell's `at > seenAfter` would count …00.123 as still unseen.
             let newest = list.compactMap { ISODate.parse($0.happenedAt) }.max()
-            Preferences.notificationsSeen = ISODate.string(from: newest ?? .now)
+            Preferences.notificationsSeen = ISODate.string(from: newest?.addingTimeInterval(0.001) ?? .now)
             // `window.dispatchEvent(new Event("amsa-notif-seen"))` → refresh the badge now.
             shell.load(force: true)
         } catch {
@@ -105,7 +116,7 @@ struct NotificationsView: View {
                 VStack(spacing: 0) {
                     ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                         if index > 0 { TWDivider() }
-                        NotificationRow(item: item) {
+                        NotificationRow(item: item, isNew: isNew(item)) {
                             if let href = item.href { router.navigate(href: href) }
                         }
                     }
@@ -117,6 +128,7 @@ struct NotificationsView: View {
 
 private struct NotificationRow: View {
     let item: NotificationItem
+    let isNew: Bool
     let onTap: () -> Void
 
     var body: some View {
@@ -128,10 +140,14 @@ private struct NotificationRow: View {
                 Text(RelativeTime.notification.format(item.happenedAt)).tw(.xs).foregroundStyle(Palette.gray400).padding(.top, 4)
             }
             Spacer(minLength: 0)
+            if isNew {
+                Circle().fill(Palette.red500).frame(width: 10, height: 10)
+                    .accessibilityLabel("New")
+            }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(Palette.gray50)
+        .background(isNew ? Palette.blue50 : Palette.gray50)
         .contentShape(Rectangle())
 
         // Links to web-only pages (e.g. `/dashboard/events`) stay visible but aren't tappable.
@@ -161,6 +177,7 @@ private struct NotificationRow: View {
         switch item.type {
         case "follow": "user-plus"
         case "thread_question", "thread_answered": "chat-bubble"
+        case "content_report", "post_report": "flag"
         default: "bell"
         }
     }

@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct AMSAApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var environment: AppEnvironment
 
     init() {
@@ -10,7 +11,9 @@ struct AMSAApp: App {
         // UI tests start signed out regardless of what an earlier run left in the Keychain.
         if ProcessInfo.processInfo.arguments.contains("-uiTestSignedOut") { Keychain.delete(SessionStore.account) }
         #endif
-        _environment = State(initialValue: AppEnvironment.live())
+        let environment = AppEnvironment.live()
+        AppDelegate.push = environment.push
+        _environment = State(initialValue: environment)
     }
 
     var body: some Scene {
@@ -21,6 +24,8 @@ struct AMSAApp: App {
                 .environment(environment.router)
                 .environment(environment.links)
                 .environment(environment.colleges)
+                .environment(environment.safety)
+                .environment(environment.push)
                 .environment(\.appEnvironment, environment)
                 .environment(\.supabaseStorage, environment.storage)
                 .preferredColorScheme(.light)

@@ -2,15 +2,19 @@ import SwiftUI
 
 // Port of src/app/(dashboard)/dashboard/threads/page.tsx
 struct ThreadsView: View {
+    /// Owned by Home's bottom bar.
+    @Binding var activeCategory: String
+    @Binding var filterOpen: Bool
+    @Binding var composeOpen: Bool
+
     @Environment(SessionStore.self) private var session
+    @Environment(SafetyStore.self) private var safety
 
     @State private var threads: [HubThread] = []
     @State private var pageLoading = true
     @State private var nextCursor: String?
     @State private var loadingMore = false
-    @State private var postOpen = false
     @State private var submitMsg: (text: String, ok: Bool)?
-    @State private var activeCategory = "all"
     @State private var dropdown = DropdownController()
     @State private var messageTask: Task<Void, Never>?
 
@@ -25,18 +29,14 @@ struct ThreadsView: View {
     }
 
     private var visibleThreads: [HubThread] {
-        activeCategory == "all" ? threads : threads.filter { $0.category == activeCategory }
+        threads.filter { thread in
+            (activeCategory == "all" || thread.category == activeCategory) && !safety.isHidden(thread.asker?.id)
+        }
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                ComposerTrigger(text: "Ask something from the community...") {
-                    postOpen = true
-                    submitMsg = nil
-                }
-                .padding(.bottom, 24)
-
                 if let submitMsg {
                     Text(submitMsg.text)
                         .tw(.sm)
@@ -48,8 +48,6 @@ struct ThreadsView: View {
                                border: submitMsg.ok ? Palette.green100 : Palette.red100)
                         .padding(.bottom, 16)
                 }
-
-                if !pageLoading, categoryTabs.count > 1 { tabs.padding(.bottom, 16) }
 
                 if pageLoading {
                     ForEach(0..<3, id: \.self) { _ in ThreadSkeleton() }
@@ -82,41 +80,51 @@ struct ThreadsView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 32)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
         }
+        .refreshable { await load(refreshing: true) }
         .scrollDismissesKeyboard(.interactively)
         .environment(dropdown)
         .dropdownHost(dropdown)
         .task { await load() }
-        .webModal(isPresented: $postOpen) {
+        .onChange(of: composeOpen) { _, open in if open { submitMsg = nil } }
+        .sheet(isPresented: $filterOpen) { categorySheet }
+        .webModal(isPresented: $composeOpen) {
             ThreadComposer(onCreated: {
-                postOpen = false
+                composeOpen = false
                 submitMsg = ("Your post has been submitted for review. It will appear once a board member approves it.", true)
                 messageTask?.cancel()
                 messageTask = Task {
                     try? await Task.sleep(for: .seconds(6))
                     if !Task.isCancelled { submitMsg = nil }
                 }
-            }, onClose: { postOpen = false })
+            }, onClose: { composeOpen = false })
         }
     }
 
-    private var tabs: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                tab(label: "All", cat: "all", domain: nil)
-                ForEach(categoryTabs, id: \.cat) { item in
-                    tab(label: item.cat == "general" ? "General" : item.cat, cat: item.cat, domain: item.domain)
+    private var categorySheet: some View {
+        ChromeSheet(title: "Categories", onReset: activeCategory == "all" ? nil : { activeCategory = "all" }) {
+            if pageLoading {
+                Text("Loading…").tw(.sm).foregroundStyle(Palette.gray400)
+            } else {
+                FlowLayout(spacing: 8) {
+                    tab(label: "All", cat: "all", domain: nil)
+                    ForEach(categoryTabs, id: \.cat) { item in
+                        tab(label: item.cat == "general" ? "General" : item.cat, cat: item.cat, domain: item.domain)
+                    }
                 }
             }
-            .padding(.bottom, 4)
         }
     }
 
     /// `px-4 py-2 rounded-full text-sm font-semibold` (a dashboard button → 4px).
     private func tab(label: String, cat: String, domain: String?) -> some View {
         let active = activeCategory == cat
-        return Button { activeCategory = cat } label: {
+        return Button {
+            activeCategory = cat
+            filterOpen = false
+        } label: {
             HStack(spacing: 6) {
                 if cat != "general", cat != "all", let domain, !active,
                    let url = LogoLookup.badgeURL(domain: domain, token: AppConfig.current.logoDevToken)
@@ -140,14 +148,15 @@ struct ThreadsView: View {
         .buttonStyle(.plain)
     }
 
-    private func load() async {
-        pageLoading = true
+    /// Pull-to-refresh keeps the current threads on screen instead of the skeleton.
+    private func load(refreshing: Bool = false) async {
+        if !refreshing { pageLoading = true }
         do {
             let data = try await session.api.send(HubThreadsAPI.list())
             threads = data.threads ?? []
             nextCursor = data.nextCursor
         } catch {
-            threads = []
+            if !refreshing { threads = [] }
         }
         pageLoading = false
     }
