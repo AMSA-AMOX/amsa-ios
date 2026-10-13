@@ -28,13 +28,13 @@ targets:
           - "Resources/Fonts/OFL.txt"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: mn.amsa.app
+        PRODUCT_BUNDLE_IDENTIFIER: mn.amsa.ios
         PRODUCT_NAME: AMSA
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: $(AMSA_DEVELOPMENT_TEAM)
-        # Push notifications; off until Config/Base.xcconfig points it at AMSA/AMSA.entitlements.
+        # Push notifications; set in Config/Base.xcconfig (empty for a free Personal Team).
         CODE_SIGN_ENTITLEMENTS: $(AMSA_CODE_SIGN_ENTITLEMENTS)
         ENABLE_PREVIEWS: YES
     info:
@@ -75,7 +75,7 @@ targets:
       - target: AMSA
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: mn.amsa.app.tests
+        PRODUCT_BUNDLE_IDENTIFIER: mn.amsa.ios.tests
         GENERATE_INFOPLIST_FILE: YES
 
   AMSAUITests:
@@ -87,7 +87,7 @@ targets:
       - target: AMSA
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: mn.amsa.app.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: mn.amsa.ios.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: AMSA
 

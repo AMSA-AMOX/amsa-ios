@@ -1,7 +1,7 @@
 import SwiftUI
 
 // Reporting and blocking (App Store Review Guideline 1.2). Not ported from the web, which only
-// reports feed posts; the server side is in website-changes/.
+// reports feed posts; the server side is in the website repo (`src/lib/reports.ts`, `/api/reports`).
 
 /// Pick a reason, add an optional note, submit; then offer to block the author.
 struct ReportSheet: View {

@@ -110,7 +110,7 @@ struct DecodingTests {
     }
 
     @Test func reportTargetsMatchTheServer() {
-        // `REPORT_TARGET_TYPES` in website-changes/src/lib/reports.ts; review ids are uuids.
+        // `REPORT_TARGET_TYPES` in the website repo's src/lib/reports.ts; review ids are uuids.
         #expect(ReportTarget.post(5).type == "post" && ReportTarget.post(5).id == "5")
         #expect(ReportTarget.hubComment(9).type == "hub_comment")
         #expect(ReportTarget.collegeReview("a-b").type == "college_review" && ReportTarget.collegeReview("a-b").id == "a-b")

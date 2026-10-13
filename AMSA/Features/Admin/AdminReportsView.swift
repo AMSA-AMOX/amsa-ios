@@ -1,4 +1,4 @@
-// The reports queue (website-changes/src/app/(dashboard)/dashboard/admin/reports/page.tsx).
+// The reports queue (website repo: src/app/(dashboard)/dashboard/admin/reports/page.tsx).
 import SwiftUI
 
 struct ContentReport: Decodable, Sendable, Identifiable, Equatable {
