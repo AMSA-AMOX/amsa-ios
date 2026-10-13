@@ -17,8 +17,8 @@ open AMSA.xcodeproj
 ```
 
 - `scripts/gen-secrets.sh` copies only `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_LOGO_DEV_TOKEN` and `NEXT_PUBLIC_TURNSTILE_SITE_KEY`. Server secrets (`JWT_SECRET`, `TURNSTILE_SECRET_KEY`, `RESEND_*`, `PEXELS_API_KEY`, `COLLEGE_SCORECARD_API_KEY`) must never reach the app, because anything in an IPA can be extracted.
-- For device and TestFlight builds, set `AMSA_DEVELOPMENT_TEAM` in `Config/Base.xcconfig` or `Config/Secrets.xcconfig`.
-- Push notifications are off until that team is a paid Apple Developer Program team. Then set `AMSA_CODE_SIGN_ENTITLEMENTS = AMSA/AMSA.entitlements` in `Config/Base.xcconfig`; the website side is in `website-changes/README.md`. Local notifications (the welcome after signup) work without it.
+- `AMSA_DEVELOPMENT_TEAM` in `Config/Base.xcconfig` is the paid Apple Developer Program team (`4W55D23N4Z`), which signs device and TestFlight builds.
+- Push notifications are on (`AMSA_CODE_SIGN_ENTITLEMENTS = AMSA/AMSA.entitlements`). To build with a free Personal Team instead, change the team and empty that setting, because free teams can't sign push. The website side is in the website repo's `src/lib/push.ts`; it needs the `APNS_KEY`, `APNS_KEY_ID` and `APNS_TEAM_ID` environment variables. Local notifications (the welcome after signup) work either way.
 - Re-run `xcodegen` after adding or removing files.
 
 ## Tests
