@@ -6,6 +6,8 @@ struct ShellData: Decodable, Sendable, Equatable {
         var posts: Int = 0
         var threads: Int = 0
         var verification: Int = 0
+        /// Open content reports; optional because older servers don't send it.
+        var reports: Int? = nil
     }
     /// nil = no US Member application on file.
     var membershipStatus: String?

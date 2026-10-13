@@ -57,15 +57,26 @@ struct CollegeDetailView: View {
     @Environment(SessionStore.self) private var session
     @Environment(Router.self) private var router
     @Environment(ExternalLinkPresenter.self) private var links
+    @Environment(SafetyStore.self) private var safety
 
     @State private var profile: ScorecardProfile?
     @State private var students: [SchoolStudent] = []
-    @State private var studentsLoading = true
+    @State private var studentsPage = 0
     @State private var posts: [CollegePost] = []
-    @State private var postsLoading = true
     @State private var lightbox: LightboxItem?
+    @State private var reportRequest: ReportRequest?
+    @State private var blockCandidate: BlockCandidate?
 
     private var college: College? { store.byId[collegeId] }
+
+    private var visiblePosts: [CollegePost] { posts.filter { !safety.isHidden($0.author?.id) } }
+
+    private static let studentsPageSize = 3
+    private var studentsPageCount: Int { (students.count + Self.studentsPageSize - 1) / Self.studentsPageSize }
+    private var visibleStudents: ArraySlice<SchoolStudent> {
+        let start = min(studentsPage * Self.studentsPageSize, students.count)
+        return students[start..<min(start + Self.studentsPageSize, students.count)]
+    }
 
     var body: some View {
         ScrollView {
@@ -78,7 +89,7 @@ struct CollegeDetailView: View {
                 .padding(.vertical, 40)
             } else if let college {
                 VStack(alignment: .leading, spacing: 0) {
-                    info(college).padding(24)
+                    info(college).padding(.horizontal, 24).padding(.top, 8).padding(.bottom, 24)
                     ReviewsColumn(config: .college(id: college.id, name: college.name))
                 }
             } else {
@@ -99,6 +110,8 @@ struct CollegeDetailView: View {
         .onAppear { store.load() }
         .task(id: collegeId) { await loadExtras() }
         .lightbox($lightbox, backdropOpacity: 0.8)
+        .reportSheet($reportRequest)
+        .blockConfirmation($blockCandidate)
     }
 
     // MARK: Info column
@@ -114,16 +127,6 @@ struct CollegeDetailView: View {
         ].compactMap { $0 }
 
         VStack(alignment: .leading, spacing: 0) {
-            Button { router.back(to: .colleges) } label: {
-                HStack(spacing: 6) {
-                    Icon("chevron-left-thick", size: 16)
-                    Text("Back to research").tw(.sm)
-                }
-                .foregroundStyle(Palette.gray500)
-            }
-            .buttonStyle(.plain)
-            .padding(.bottom, 20)
-
             HStack(alignment: .top, spacing: 16) {
                 DetailLogo(college: c)
                 VStack(alignment: .leading, spacing: 0) {
@@ -139,13 +142,6 @@ struct CollegeDetailView: View {
             }
             .padding(.bottom, 20)
 
-            // "Campus photo" — the web embeds Google Maps in an iframe.
-            WebView(source: .url(mapURL(c)))
-                .frame(height: 320)
-                .clipShape(RoundedRectangle(cornerRadius: TW.radiusLg))
-                .overlay(RoundedRectangle(cornerRadius: TW.radiusLg).strokeBorder(Palette.gray200, lineWidth: 1))
-                .padding(.bottom, 24)
-
             statGrid([
                 ("Tuition", Formatters.money(c.tuition), c.type == "public" ? "OOS rate" : "per year"),
                 (c.estimatedNetCost != nil ? "Est. Net Cost" : "Total COA", Formatters.money(c.estimatedNetCost ?? c.totalCostOfAttendance),
@@ -157,8 +153,9 @@ struct CollegeDetailView: View {
             ])
             .padding(.bottom, 20)
 
-            studentsSection
-            postsSection
+            // Hidden while loading and when empty (the web shows "0 …" placeholders).
+            if !students.isEmpty { studentsSection }
+            if !visiblePosts.isEmpty { postsSection }
             atAGlance(c)
             studentProfile(c)
             tipsSection(c)
@@ -166,19 +163,7 @@ struct CollegeDetailView: View {
             aidSection(c)
             costSection(c)
             moreInfo(c)
-
-            Text("Data sourced from 2024 College Scorecard, Common Data Set, and IPEDS. Figures such as tuition, aid, and acceptance rates may change year to year — verify with each school's official website.")
-                .tw(.xs, leading: .relaxed)
-                .foregroundStyle(Palette.gray400)
-                .padding(.top, 20)
-                .padding(.bottom, 8)
-                .topBorder(Palette.gray300, width: 2)
         }
-    }
-
-    private func mapURL(_ c: College) -> URL {
-        let q = "\(c.name), \(c.location)".addingPercentEncoding(withAllowedCharacters: .jsURIComponent) ?? ""
-        return URL(string: "https://maps.google.com/maps?q=\(q)&output=embed")!
     }
 
     private func statGrid(_ stats: [(String, String, String)]) -> some View {
@@ -209,53 +194,71 @@ struct CollegeDetailView: View {
     // MARK: Sections
 
     private var studentsSection: some View {
-        InfoSection(label: studentsLoading ? "AMSA Members at This School"
-                    : "\(students.count) AMSA \(students.count == 1 ? "Member" : "Members") at This School",
+        InfoSection(label: "\(students.count) AMSA \(students.count == 1 ? "Member" : "Members") at This School",
                     icon: "feather-users") {
-            if studentsLoading {
-                VStack(spacing: 12) { ForEach(0..<3, id: \.self) { _ in SkeletonBlock(height: 40) } }.twPulse()
-            } else if students.isEmpty {
-                Text("No AMSA members have linked this school to their profile yet.").tw(.sm).foregroundStyle(Palette.gray400)
-            } else {
-                VStack(spacing: 12) {
-                    ForEach(students) { s in
-                        Button { router.navigate(to: .memberProfile(id: s.id)) } label: {
-                            HStack(spacing: 12) {
-                                Avatar(imageURL: s.profilePic, initials: .initials(s.firstName, s.lastName), size: 36, fontSize: .xs,
-                                       background: Palette.gray100, foreground: Palette.gray500, fontWeight: .semibold)
-                                VStack(alignment: .leading, spacing: 0) {
-                                    (Text("\(s.firstName ?? "") \(s.lastName ?? "")")
-                                        + Text(s.role == Role.ambassador ? "  Ambassador" : "")
-                                        .font(.custom(TW.Weight.medium.fontName, fixedSize: 12)).foregroundColor(Palette.gray400))
-                                        .tw(.sm, .semibold).foregroundStyle(Palette.gray900).lineLimit(1)
-                                    let sub = [s.major?.nilIfEmpty, s.graduationYear?.value.nilIfEmpty].compactMap { $0 }
-                                    if !sub.isEmpty {
-                                        Text(sub.joined(separator: " · ")).tw(.xs).foregroundStyle(Palette.gray400).lineLimit(1)
-                                    }
+            VStack(spacing: 12) {
+                ForEach(visibleStudents) { s in
+                    Button { router.navigate(to: .memberProfile(id: s.id)) } label: {
+                        HStack(spacing: 12) {
+                            Avatar(imageURL: s.profilePic, initials: .initials(s.firstName, s.lastName), size: 36, fontSize: .xs,
+                                   background: Palette.gray100, foreground: Palette.gray500, fontWeight: .semibold)
+                            VStack(alignment: .leading, spacing: 0) {
+                                (Text("\(s.firstName ?? "") \(s.lastName ?? "")")
+                                    + Text(s.role == Role.ambassador ? "  Ambassador" : "")
+                                    .font(.custom(TW.Weight.medium.fontName, fixedSize: 12)).foregroundColor(Palette.gray400))
+                                    .tw(.sm, .semibold).foregroundStyle(Palette.gray900).lineLimit(1)
+                                let sub = [s.major?.nilIfEmpty, s.graduationYear?.value.nilIfEmpty].compactMap { $0 }
+                                if !sub.isEmpty {
+                                    Text(sub.joined(separator: " · ")).tw(.xs).foregroundStyle(Palette.gray400).lineLimit(1)
                                 }
-                                Spacer(minLength: 0)
                             }
-                            .padding(12)
-                            .twBox(background: Palette.white, radius: TW.radiusXl, border: Palette.gray200, borderWidth: 2)
+                            Spacer(minLength: 0)
                         }
-                        .buttonStyle(.plain)
+                        .padding(12)
+                        .twBox(background: Palette.white, radius: TW.radiusXl, border: Palette.gray200, borderWidth: 2)
                     }
+                    .buttonStyle(.plain)
                 }
+                if studentsPageCount > 1 { studentsPager }
             }
         }
     }
 
-    private var postsSection: some View {
-        InfoSection(label: postsLoading ? "Posts From This School"
-                    : "\(posts.count) \(posts.count == 1 ? "Post" : "Posts") From This School",
-                    icon: "feather-file-text") {
-            if postsLoading {
-                VStack(spacing: 16) { ForEach(0..<3, id: \.self) { _ in SkeletonBlock(height: 80) } }.twPulse()
-            } else if posts.isEmpty {
-                Text("No posts from this school yet. Be the first to share your experience.").tw(.sm).foregroundStyle(Palette.gray400)
-            } else {
-                VStack(spacing: 12) { ForEach(posts) { postRow($0) } }
+    /// Three members per page, so a school with many members doesn't take over the page.
+    private var studentsPager: some View {
+        HStack(spacing: 16) {
+            pagerButton(systemImage: "chevron.left", label: "Previous members", disabled: studentsPage == 0) {
+                studentsPage -= 1
             }
+            Text("\(studentsPage + 1) of \(studentsPageCount)")
+                .tw(.sm, .semibold).foregroundStyle(Palette.gray500).monospacedDigit()
+                .contentTransition(.numericText())
+            pagerButton(systemImage: "chevron.right", label: "Next members", disabled: studentsPage >= studentsPageCount - 1) {
+                studentsPage += 1
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 4)
+    }
+
+    private func pagerButton(systemImage: String, label: String, disabled: Bool, action: @escaping () -> Void) -> some View {
+        Button { withAnimation(.easeInOut(duration: 0.2)) { action() } } label: {
+            Image(systemName: systemImage)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Palette.gray600)
+                .frame(width: 36, height: 32)
+                .twBox(background: Palette.white, radius: TW.dashboardButtonRadius, border: Palette.gray200, borderWidth: 2)
+        }
+        .buttonStyle(.plain)
+        .disabled(disabled)
+        .opacity(disabled ? 0.4 : 1)
+        .accessibilityLabel(label)
+    }
+
+    private var postsSection: some View {
+        InfoSection(label: "\(visiblePosts.count) \(visiblePosts.count == 1 ? "Post" : "Posts") From This School",
+                    icon: "feather-file-text") {
+            VStack(spacing: 12) { ForEach(visiblePosts) { postRow($0) } }
         }
     }
 
@@ -269,6 +272,12 @@ struct CollegeDetailView: View {
                     .tw(.xs, .semibold).foregroundStyle(Palette.gray700)
                 Text("·").foregroundStyle(Palette.gray300)
                 Text(RelativeTime.agoMonth.format(post.createdAt)).tw(.xs).foregroundStyle(Palette.gray400)
+                Spacer(minLength: 0)
+                if post.author?.id != session.user?.id {
+                    SafetyMenu(report: ReportRequest(target: .post(post.id), author: post.author.map {
+                        BlockCandidate(id: $0.id, name: "\($0.firstName ?? "") \($0.lastName ?? "")".trimmed.nilIfEmpty ?? "this member")
+                    }), onReport: { reportRequest = $0 }, onBlock: { blockCandidate = $0 }, size: 14)
+                }
             }
             .padding(.bottom, 8)
             if let body = post.body, !body.isEmpty {
@@ -545,12 +554,9 @@ struct CollegeDetailView: View {
             Task { profile = try? await api.send(CollegeDetailAPI.scorecard(id)) },
             Task {
                 students = (try? await api.send(CollegeDetailAPI.students(id)))?.students ?? []
-                studentsLoading = false
+                studentsPage = 0
             },
-            Task {
-                posts = (try? await api.send(CollegeDetailAPI.posts(id)))?.posts ?? []
-                postsLoading = false
-            },
+            Task { posts = (try? await api.send(CollegeDetailAPI.posts(id)))?.posts ?? [] },
         ]
         for task in tasks { await task.value }
     }

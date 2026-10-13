@@ -12,6 +12,8 @@ struct AuthUser: Codable, Sendable, Equatable {
     var profilePic: String?
     var level: FlexibleString?
     var bio: String?
+    /// When they agreed to the Terms of Use; nil for older accounts (and older servers).
+    var termsAcceptedAt: String? = nil
 
     var fullName: String { "\(firstName) \(lastName)" }
     var initials: String { .initials(firstName, lastName) }

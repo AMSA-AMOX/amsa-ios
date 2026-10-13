@@ -25,7 +25,7 @@ struct AdminPostsView: View {
                 Color.clear
             }
         }
-        .onAppear { if !allowed { router.navigate(to: .profile()) } }
+        .onAppear { if !allowed { router.redirect(to: .profile()) } }
         .task(id: status) { if allowed { await load(status) } }
     }
 

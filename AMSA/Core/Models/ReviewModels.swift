@@ -52,6 +52,8 @@ struct ReviewsConfig {
     let placeholder: String
     let prompts: [String]
     let uploadPath: (_ userId: Int, _ index: Int) -> String
+    /// POST /api/reports target for a review.
+    let reportTarget: (_ id: String) -> ReportTarget
 
     static func place(abbr: String, stateName: String) -> ReviewsConfig {
         let upper = abbr.uppercased()
@@ -65,7 +67,8 @@ struct ReviewsConfig {
             helpful: { id in Endpoint(method: .post, path: "/api/places/reviews/\(id)/helpful") },
             placeholder: "Share your experience living in \(stateName)…",
             prompts: StaticData.constants.placeReviewPrompts,
-            uploadPath: { userId, index in UploadPath.placeReview(userId: userId, index: index) }
+            uploadPath: { userId, index in UploadPath.placeReview(userId: userId, index: index) },
+            reportTarget: { .placeReview($0) }
         )
     }
 
@@ -80,7 +83,8 @@ struct ReviewsConfig {
             helpful: { reviewId in Endpoint(method: .post, path: "/api/colleges/reviews/\(reviewId)/helpful") },
             placeholder: "Share your experience at \(name)…",
             prompts: StaticData.constants.collegeReviewPrompts,
-            uploadPath: { userId, index in UploadPath.collegeReview(userId: userId, index: index) }
+            uploadPath: { userId, index in UploadPath.collegeReview(userId: userId, index: index) },
+            reportTarget: { .collegeReview($0) }
         )
     }
 }

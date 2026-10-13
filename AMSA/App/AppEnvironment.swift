@@ -12,6 +12,8 @@ final class AppEnvironment {
     let links: ExternalLinkPresenter
     let storage: SupabaseStorage
     let colleges: CollegesStore
+    let safety: SafetyStore
+    let push: PushNotifications
 
     init(config: AppConfig) {
         self.config = config
@@ -24,9 +26,15 @@ final class AppEnvironment {
         self.links = ExternalLinkPresenter()
         self.storage = SupabaseStorage(baseURL: config.supabaseURL, anonKey: config.supabaseAnonKey)
         self.colleges = CollegesStore(api: api)
+        self.safety = SafetyStore(api: api, tokenProvider: { [weak session] in session?.token })
+        self.push = PushNotifications(api: api)
 
+        // A follower or question just arrived: refresh the bell badge.
+        push.onReceive = { [weak self] in self?.shell.load(force: true) }
         session.onLogout = { [weak self] in
+            self?.push.signedOut()
             self?.shell.reset()
+            self?.safety.reset()
             self?.router.reset()
         }
         Task { [weak session] in

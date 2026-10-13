@@ -16,6 +16,8 @@ struct RouteTests {
         ("/dashboard/research/college/7", .collegeDetail(id: 7)),
         ("/dashboard/research/compare", .compare),
         ("/dashboard/admin/thread-approval", .adminThreadApproval),
+        ("/dashboard/admin/reports", .adminReports),
+        ("/dashboard/settings/blocked", .blockedMembers),
     ])
     func known(href: String, route: Route) {
         #expect(Route(href: href) == route)
@@ -45,17 +47,51 @@ struct RouteTests {
 @Suite("Router")
 @MainActor
 struct RouterTests {
-    @Test func detailsPushAndSidebarRoutesReplace() {
+    @Test func tabRoutesSwitchTabsAndOtherScreensPush() {
         let router = Router()
-        router.drawerOpen = true
+        router.navigate(to: .notifications)
         router.navigate(to: .colleges)
-        #expect(router.root == .colleges && router.path.isEmpty && !router.drawerOpen)
+        #expect(router.tab == .colleges && router.path.isEmpty)
         router.navigate(to: .collegeDetail(id: 1))
         router.navigate(to: .memberProfile(id: 2))
         #expect(router.path == [.collegeDetail(id: 1), .memberProfile(id: 2)])
         #expect(router.current == .memberProfile(id: 2))
         router.navigate(to: .network)
-        #expect(router.root == .network && router.path.isEmpty)
+        #expect(router.tab == .network && router.path.isEmpty && router.current == .network)
+    }
+
+    @Test func feedAndThreadsShareTheHomeTab() {
+        let router = Router()
+        router.navigate(to: .places)
+        router.navigate(to: .threads)
+        #expect(router.tab == .home && router.homeMode == .threads && router.current == .threads)
+        router.navigate(to: .feed)
+        #expect(router.tab == .home && router.homeMode == .feed && router.current == .feed)
+    }
+
+    @Test func openScreensArePoppedBackTo() {
+        let router = Router()
+        router.navigate(to: .profile())
+        router.navigate(to: .settings)
+        router.navigate(to: .adminPosts)
+        router.navigate(to: .profile(openUnansweredThreads: true))
+        #expect(router.path == [.profile(openUnansweredThreads: true)])
+        router.navigate(to: .memberProfile(id: 1))
+        router.navigate(to: .collegeDetail(id: 2))
+        router.navigate(to: .memberProfile(id: 1))
+        #expect(router.path.count == 4) // details stack
+    }
+
+    @Test func popAndRedirect() {
+        let router = Router()
+        router.navigate(to: .profile())
+        router.navigate(to: .settings)
+        router.navigate(to: .adminVerification)
+        router.redirect(to: .profile())
+        #expect(router.path == [.profile()])
+        router.pop()
+        router.pop()
+        #expect(router.path.isEmpty)
     }
 
     @Test func backPopsWhenTargetIsUnderneath() {
@@ -63,19 +99,20 @@ struct RouterTests {
         router.navigate(to: .places)
         router.navigate(to: .placeDetail(abbr: "ca"))
         router.back(to: .places)
-        #expect(router.root == .places && router.path.isEmpty)
+        #expect(router.tab == .places && router.path.isEmpty)
 
         router.navigate(to: .placeDetail(abbr: "ny"))
         router.back(to: .network) // not underneath → behaves like a link
-        #expect(router.root == .network && router.path.isEmpty)
+        #expect(router.tab == .network && router.path.isEmpty)
     }
 
     @Test func reset() {
         let router = Router()
+        router.navigate(to: .threads)
         router.navigate(to: .settings)
         router.navigate(to: .memberProfile(id: 1))
         router.reset()
-        #expect(router.root == .feed && router.path.isEmpty)
+        #expect(router.tab == .home && router.homeMode == .feed && router.path.isEmpty)
     }
 }
 

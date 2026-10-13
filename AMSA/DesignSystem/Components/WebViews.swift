@@ -1,48 +1,5 @@
 import SafariServices
 import SwiftUI
-import WebKit
-
-/// Replaces `<iframe>` embeds (Guide flip-book, college map).
-struct WebView: UIViewRepresentable {
-    enum Source: Equatable {
-        case url(URL)
-        case html(String, baseURL: URL?)
-    }
-
-    let source: Source
-    var scrollEnabled: Bool = true
-
-    func makeUIView(context: Context) -> WKWebView {
-        let config = WKWebViewConfiguration()
-        config.allowsInlineMediaPlayback = true
-        let view = WKWebView(frame: .zero, configuration: config)
-        view.isOpaque = false
-        view.backgroundColor = .clear
-        view.scrollView.isScrollEnabled = scrollEnabled
-        load(into: view)
-        context.coordinator.loaded = source
-        return view
-    }
-
-    func updateUIView(_ view: WKWebView, context: Context) {
-        guard context.coordinator.loaded != source else { return }
-        context.coordinator.loaded = source
-        load(into: view)
-    }
-
-    func makeCoordinator() -> Coordinator { Coordinator() }
-
-    final class Coordinator {
-        var loaded: Source?
-    }
-
-    private func load(into view: WKWebView) {
-        switch source {
-        case .url(let url): view.load(URLRequest(url: url))
-        case .html(let html, let baseURL): view.loadHTMLString(html, baseURL: baseURL)
-        }
-    }
-}
 
 /// `target="_blank"` links open in an in-app Safari sheet.
 struct SafariView: UIViewControllerRepresentable {

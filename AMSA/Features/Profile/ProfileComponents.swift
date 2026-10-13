@@ -32,24 +32,6 @@ struct ProfileTabBar<Tab: Hashable>: View {
     }
 }
 
-/// "Back to …" link: `inline-flex items-center gap-1.5 text-sm text-[#001049]` + chevron.
-struct BackLink: View {
-    let title: String
-    var color: Color = Palette.navy
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 6) {
-                Icon("chevron-left", size: 16)
-                Text(title).tw(.sm)
-            }
-            .foregroundStyle(color)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
 /// `text-xs font-semibold px-2.5 py-0.5 rounded-full` role pill.
 struct RolePill: View {
     let role: String

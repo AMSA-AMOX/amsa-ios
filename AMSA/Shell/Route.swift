@@ -17,9 +17,11 @@ enum Route: Hashable, Sendable {
     case inbox
     case blogs
     case settings
+    case blockedMembers
     case adminVerification
     case adminPosts
     case adminThreadApproval
+    case adminReports
 
     /// The web pathname (used for nav highlighting and the feedback `page` field).
     var webPath: String {
@@ -39,9 +41,12 @@ enum Route: Hashable, Sendable {
         case .inbox: "/dashboard/inbox"
         case .blogs: "/dashboard/blogs"
         case .settings: "/dashboard/settings"
+        // App-only (the website has no blocked-members page).
+        case .blockedMembers: "/dashboard/settings/blocked"
         case .adminVerification: "/dashboard/admin/verification"
         case .adminPosts: "/dashboard/admin/posts"
         case .adminThreadApproval: "/dashboard/admin/thread-approval"
+        case .adminReports: "/dashboard/admin/reports"
         }
     }
 
@@ -62,13 +67,26 @@ enum Route: Hashable, Sendable {
         case .inbox: "Inbox"
         case .blogs: "Blogs"
         case .settings: "Settings"
+        case .blockedMembers: "Blocked members"
         case .adminVerification: "Verification Queue"
         case .adminPosts: "Post Approval"
         case .adminThreadApproval: "Thread Approval"
+        case .adminReports: "Reports"
         }
     }
 
-    /// Detail pages are pushed; everything else replaces the root (like a sidebar link).
+    /// The tab a route lives in; every other route is pushed over the tabs.
+    var tab: Router.Tab? {
+        switch self {
+        case .feed, .threads: .home
+        case .network: .network
+        case .colleges: .colleges
+        case .places: .places
+        default: nil
+        }
+    }
+
+    /// Detail pages can stack (member → college → member); other screens open once.
     var isDetail: Bool {
         switch self {
         case .placeDetail, .collegeDetail, .memberProfile: true
@@ -101,32 +119,57 @@ enum Route: Hashable, Sendable {
         case ["dashboard", "inbox"]: self = .inbox
         case ["dashboard", "blogs"]: self = .blogs
         case ["dashboard", "settings"]: self = .settings
+        case ["dashboard", "settings", "blocked"]: self = .blockedMembers
         case ["dashboard", "admin", "verification"]: self = .adminVerification
         case ["dashboard", "admin", "posts"]: self = .adminPosts
         case ["dashboard", "admin", "thread-approval"]: self = .adminThreadApproval
+        case ["dashboard", "admin", "reports"]: self = .adminReports
         default: return nil
         }
     }
 }
 
-/// Navigation state for the dashboard shell.
+/// Navigation state for the dashboard shell: four top-bar tabs, with every other screen pushed on top.
 @MainActor
 @Observable
 final class Router {
-    var root: Route = .feed
+    enum Tab: Hashable, CaseIterable, Sendable {
+        case home, network, colleges, places
+    }
+
+    /// Home shows the Feed or Threads, switched from its bottom bar.
+    enum HomeMode: Hashable, Sendable {
+        case feed, threads
+    }
+
+    var tab: Tab = .home
+    var homeMode: HomeMode = .feed
     var path: [Route] = []
-    var drawerOpen = false
 
-    var current: Route { path.last ?? root }
+    /// The route the visible tab shows.
+    var tabRoute: Route {
+        switch tab {
+        case .home: homeMode == .feed ? .feed : .threads
+        case .network: .network
+        case .colleges: .colleges
+        case .places: .places
+        }
+    }
 
-    /// `router.push(href)` / `<Link href>`.
+    var current: Route { path.last ?? tabRoute }
+
+    /// `router.push(href)` / `<Link href>`. Tab routes switch tabs and clear the stack; a screen
+    /// that is already open (Profile, Settings, …) is popped back to; anything else is pushed.
     func navigate(to route: Route) {
-        drawerOpen = false
-        if route.isDetail {
-            path.append(route)
-        } else {
+        if let tab = route.tab {
             path = []
-            root = route
+            self.tab = tab
+            if route == .feed { homeMode = .feed }
+            if route == .threads { homeMode = .threads }
+        } else if !route.isDetail, let index = path.firstIndex(where: { $0.webPath == route.webPath }) {
+            path = Array(path[..<index]) + [route]
+        } else {
+            path.append(route)
         }
     }
 
@@ -134,10 +177,15 @@ final class Router {
         if let route = Route(href: href) { navigate(to: route) }
     }
 
+    /// The header back button and edge swipe.
+    func pop() {
+        if !path.isEmpty { path.removeLast() }
+    }
+
     /// In-page "Back to X" links: pop when X is underneath, otherwise go to X.
     func back(to route: Route) {
         if !path.isEmpty {
-            let below = path.count >= 2 ? path[path.count - 2] : root
+            let below = path.count >= 2 ? path[path.count - 2] : tabRoute
             if below.webPath == route.webPath {
                 path.removeLast()
                 return
@@ -146,9 +194,15 @@ final class Router {
         navigate(to: route)
     }
 
+    /// Role-gate redirects: replace the current screen so Back can't return to it.
+    func redirect(to route: Route) {
+        pop()
+        navigate(to: route)
+    }
+
     func reset() {
-        root = .feed
+        tab = .home
+        homeMode = .feed
         path = []
-        drawerOpen = false
     }
 }

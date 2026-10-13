@@ -30,7 +30,7 @@ struct LoginView: View {
     @FocusState private var focus: AuthField.ID?
 
     var body: some View {
-        AuthCard(title: "Welcome back", subtitle: "Sign in to your AMSA account") {
+        AuthPage(title: "Welcome back", subtitle: "Sign in to your AMSA account") {
             VStack(alignment: .leading, spacing: 20) {
                 if !error.isEmpty { AuthErrorBox(text: error) }
                 else if session.endedByExpiry { AuthErrorBox(text: "Your session has expired. Please sign in again.") }
@@ -92,12 +92,15 @@ struct SignupView: View {
     @State private var showPassword = false
     @State private var turnstileToken: String?
     @State private var turnstileReset = 0
+    @State private var acceptedTerms = false
     @State private var error = ""
     @State private var loading = false
     @FocusState private var focus: AuthField.ID?
+    @Environment(ExternalLinkPresenter.self) private var links
+    @Environment(PushNotifications.self) private var push
 
     var body: some View {
-        AuthCard(title: "Create an account", subtitle: "Join the AMSA community") {
+        AuthPage(title: "Create an account", subtitle: "Join the AMSA community") {
             VStack(alignment: .leading, spacing: 20) {
                 if !error.isEmpty { AuthErrorBox(text: error) }
 
@@ -128,12 +131,35 @@ struct SignupView: View {
                 )
                 .frame(width: 300, height: 65)
 
+                termsAgreement
+
                 AuthPrimaryButton(title: loading ? "Creating account…" : "Create Account",
-                                  disabled: loading || turnstileToken == nil, action: submit)
+                                  disabled: loading || turnstileToken == nil || !acceptedTerms, action: submit)
                     .padding(.top, 8)
 
                 AuthFooter(prompt: "Already have an account?", link: "Sign in") { go(.login) }
             }
+        }
+    }
+
+    /// Required by the server and by App Store Guideline 1.2 (an agreement with zero tolerance for abuse).
+    private var termsAgreement: some View {
+        HStack(alignment: .top, spacing: 12) {
+            WebCheckbox(isOn: $acceptedTerms, size: 20, tint: Palette.navy)
+                .padding(.top, 1)
+                .accessibilityLabel("I agree to the Terms of Use and Privacy Policy")
+            (Text("I agree to the ")
+                + Text("[Terms of Use](amsa-terms)").underline()
+                + Text(" and ")
+                + Text("[Privacy Policy](amsa-privacy)").underline()
+                + Text(". There is no tolerance for objectionable content or abusive members."))
+                .tw(.sm)
+                .foregroundStyle(Palette.gray600)
+                .tint(Palette.navy)
+                .environment(\.openURL, OpenURLAction { url in
+                    links.open(url.absoluteString == "amsa-terms" ? AppConfig.current.termsURL : AppConfig.current.privacyPolicyURL)
+                    return .handled
+                })
         }
     }
 
@@ -151,11 +177,16 @@ struct SignupView: View {
             error = "Please complete the security check."
             return
         }
+        guard acceptedTerms else {
+            error = "Please agree to the Terms of Use."
+            return
+        }
         loading = true
         Task {
             do {
                 _ = try await session.signup(email: email, password: password, firstName: firstName,
                                              lastName: lastName, turnstileToken: token)
+                push.welcomeAfterSignup(firstName: firstName)
             } catch let e {
                 let message = e.apiMessage ?? ""
                 error = message.isEmpty ? "Registration failed" : message
@@ -180,7 +211,7 @@ struct ForgotPasswordView: View {
     @FocusState private var focus: AuthField.ID?
 
     var body: some View {
-        AuthCard(title: "Forgot password", subtitle: "Enter your email and we'll send you a reset link") {
+        AuthPage(title: "Forgot password", subtitle: "Enter your email and we'll send you a reset link") {
             if sent {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("If an account exists for that email, a password reset link is on its way. Check your inbox (and spam folder).")
@@ -235,8 +266,9 @@ struct ForgotPasswordView: View {
 
 // MARK: - Shared auth chrome
 
-/// `min-h-[80vh] flex items-center justify-center px-4 py-16` › `w-full max-w-md bg-white shadow-xl rounded-2xl p-10`.
-struct AuthCard<Content: View>: View {
+/// `min-h-[80vh] flex items-center justify-center px-4 py-16` › `w-full max-w-md`. Unlike the web, the form
+/// sits directly on the page: no card, shadow or logo.
+struct AuthPage<Content: View>: View {
     let title: String
     let subtitle: String
     @ViewBuilder let content: Content
@@ -246,11 +278,6 @@ struct AuthCard<Content: View>: View {
             ScrollView {
                 VStack(spacing: 0) {
                     VStack(spacing: 0) {
-                        Image("HeaderLogo")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 48)
-                            .padding(.bottom, 16)
                         Text(title)
                             .tw(.x3l, .bold)
                             .foregroundStyle(Palette.navy)
@@ -264,11 +291,8 @@ struct AuthCard<Content: View>: View {
                     .padding(.bottom, 32)
                     content
                 }
-                .padding(40)
                 .frame(maxWidth: 448)
-                .background(RoundedRectangle(cornerRadius: TW.radius2xl).fill(Palette.white))
-                .twShadow(.xl)
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 24)
                 .padding(.vertical, 64)
                 .frame(minHeight: proxy.size.height * 0.8)
                 .frame(maxWidth: .infinity)
@@ -350,7 +374,7 @@ struct AuthPasswordField: View {
     }
 }
 
-/// `.input`: `rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:ring-2 focus:ring-[#001A78]`.
+/// `.input`: `rounded-lg border border-gray-300 px-4 py-2 focus:ring-2 focus:ring-[#001A78]` (the web's `shadow-sm` is dropped).
 struct AuthInputBox<Content: View>: View {
     let focused: Bool
     var trailingPadding: CGFloat = 16
@@ -363,7 +387,7 @@ struct AuthInputBox<Content: View>: View {
             .padding(.trailing, trailingPadding)
             .padding(.vertical, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(shape.fill(Palette.white).twShadow(.sm))
+            .background(shape.fill(Palette.white))
             .overlay(shape.strokeBorder(Palette.gray300, lineWidth: 1))
             .overlay {
                 if focused { shape.inset(by: -1).stroke(Palette.navyFocus, lineWidth: 2) }

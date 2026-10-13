@@ -29,11 +29,8 @@ struct NetworkView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 16) {
-                    SearchField(placeholder: "Search by name or school...", text: $query, focused: $searchFocused)
-                    Text(resultCountLabel).tw(.xs).foregroundStyle(Palette.gray400).fixedSize()
-                }
-                .padding(.bottom, 20)
+                Text(resultCountLabel).tw(.xs).foregroundStyle(Palette.gray400)
+                    .padding(.bottom, 12)
 
                 VStack(spacing: 16) {
                     if loadingMembers {
@@ -73,9 +70,17 @@ struct NetworkView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 28)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
         }
         .scrollDismissesKeyboard(.interactively)
+        .refreshable {
+            searchTask?.cancel()
+            if query.trimmed.isEmpty { await loadDiscovery() } else { await runSearch(query) }
+        }
+        .floatingBottomBar {
+            ChromeSearchField(placeholder: "Search by name or school...", text: $query, focused: $searchFocused)
+        }
         .task { await loadDiscovery() }
         .onChange(of: query) { _, newValue in queryChanged(newValue) }
     }
@@ -198,39 +203,5 @@ struct NetworkView: View {
             }
             inFlightFollow.remove(memberId)
         }
-    }
-}
-
-/// Search input: `pl-10 pr-4 py-2.5 border-2 border-gray-300 rounded-lg text-lg bg-gray-50
-/// focus:border-gray-500 focus:bg-white` with a magnifier at `left-3`.
-struct SearchField: View {
-    let placeholder: String
-    @Binding var text: String
-    var focused: FocusState<Bool>.Binding
-    var icon: String = "search-lg"
-
-    var body: some View {
-        let isFocused = focused.wrappedValue
-        HStack(spacing: 8) {
-            Icon(icon, size: 20).foregroundStyle(Palette.gray400)
-            ZStack(alignment: .leading) {
-                if text.isEmpty {
-                    Text(placeholder).tw(.lg).foregroundStyle(Palette.black.opacity(0.5)).lineLimit(1)
-                }
-                TextField("", text: $text)
-                    .tw(.lg)
-                    .foregroundStyle(Palette.black)
-                    .focused(focused)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .submitLabel(.search)
-            }
-        }
-        .padding(.leading, 12)
-        .padding(.trailing, 16)
-        .padding(.vertical, 10)
-        .frame(maxWidth: 448)
-        .twBox(background: isFocused ? Palette.white : Palette.gray50, radius: TW.radiusLg,
-               border: isFocused ? Palette.gray500 : Palette.gray300, borderWidth: 2)
     }
 }

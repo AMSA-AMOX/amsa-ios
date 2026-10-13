@@ -3,6 +3,7 @@ import SwiftUI
 // Port of src/app/(dashboard)/dashboard/inbox/page.tsx
 struct InboxView: View {
     @Environment(SessionStore.self) private var session
+    @Environment(SafetyStore.self) private var safety
 
     @State private var threads: [QAThread] = []
     @State private var pageLoading = true
@@ -12,6 +13,13 @@ struct InboxView: View {
     @State private var toggling: Set<Int> = []
     @State private var deleting: Set<Int> = []
     @State private var errors: [Int: String] = [:]
+    @State private var reportRequest: ReportRequest?
+    @State private var blockCandidate: BlockCandidate?
+
+    /// Questions with a member the viewer blocked disappear right away (the server drops them on reload).
+    private var visibleThreads: [QAThread] {
+        threads.filter { !safety.isHidden($0.asker?.id) && !safety.isHidden($0.recipient?.id) }
+    }
 
     /// The server treats ambassadors as recipients too (PATCH/DELETE allow them); the web client omitted
     /// them, which left ambassadors unable to answer here. Matches the server.
@@ -45,7 +53,7 @@ struct InboxView: View {
                         }
                     }
                     .background(Palette.white)
-                } else if threads.isEmpty {
+                } else if visibleThreads.isEmpty {
                     VStack(spacing: 4) {
                         Text(isRecipient ? "No questions yet." : "You haven't asked any questions yet.")
                             .tw(.sm, .semibold).foregroundStyle(Palette.gray500)
@@ -60,17 +68,17 @@ struct InboxView: View {
                     .padding(.vertical, 40)
                     .background(Palette.white)
                 } else if isRecipient {
-                    let pending = threads.filter { $0.status == "pending" }
-                    let answered = threads.filter { $0.status == "answered" }
+                    let pending = visibleThreads.filter { $0.status == "pending" }
+                    let answered = visibleThreads.filter { $0.status == "answered" }
                     VStack(alignment: .leading, spacing: 24) {
                         if !pending.isEmpty { section("Pending (\(pending.count))", pending) }
                         if !answered.isEmpty { section("Answered (\(answered.count))", answered) }
                     }
                 } else {
                     VStack(spacing: 0) {
-                        ForEach(Array(threads.enumerated()), id: \.element.id) { index, thread in
+                        ForEach(Array(visibleThreads.enumerated()), id: \.element.id) { index, thread in
                             if index > 0 { TWDivider(color: Palette.gray100, width: 1) }
-                            SentThreadRow(thread: thread)
+                            SentThreadRow(thread: thread, onReport: { reportRequest = $0 }, onBlock: { blockCandidate = $0 })
                         }
                     }
                     .background(Palette.white)
@@ -81,6 +89,8 @@ struct InboxView: View {
         }
         .scrollDismissesKeyboard(.interactively)
         .task { await load() }
+        .reportSheet($reportRequest)
+        .blockConfirmation($blockCandidate)
     }
 
     private func section(_ title: String, _ items: [QAThread]) -> some View {
@@ -99,7 +109,9 @@ struct InboxView: View {
                             onDelete: { delete(thread.id) },
                             submitting: submitting.contains(thread.id),
                             toggling: toggling.contains(thread.id),
-                            deleting: deleting.contains(thread.id)
+                            deleting: deleting.contains(thread.id),
+                            onReport: { reportRequest = $0 },
+                            onBlock: { blockCandidate = $0 }
                         )
                         if let error = errors[thread.id], !error.isEmpty {
                             Text(error).tw(.xs).foregroundStyle(Palette.red500).padding(.horizontal, 16).padding(.bottom, 12)
@@ -185,6 +197,8 @@ private struct ReceivedThreadRow: View {
     let submitting: Bool
     let toggling: Bool
     let deleting: Bool
+    let onReport: (ReportRequest) -> Void
+    let onBlock: (BlockCandidate) -> Void
 
     @State private var confirmDelete = false
 
@@ -197,6 +211,9 @@ private struct ReceivedThreadRow: View {
                     Text(thread.asker.map { $0.fullName } ?? "Member").tw(.sm, .semibold).foregroundStyle(Palette.gray900)
                     Spacer(minLength: 0)
                     Text(RelativeTime.shortMonth.format(thread.createdAt)).tw(.xs).foregroundStyle(Palette.gray400)
+                    SafetyMenu(report: ReportRequest(target: .question(thread.id), author: thread.asker.map {
+                        BlockCandidate(id: $0.id, name: $0.fullName.nilIfEmpty ?? "this member")
+                    }), onReport: onReport, onBlock: onBlock, size: 14)
                 }
                 .padding(.bottom, 2)
                 Text(thread.question).tw(.sm, leading: .snug).foregroundStyle(Palette.gray700)
@@ -296,6 +313,8 @@ private struct ReceivedThreadRow: View {
 
 private struct SentThreadRow: View {
     let thread: QAThread
+    let onReport: (ReportRequest) -> Void
+    let onBlock: (BlockCandidate) -> Void
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -306,6 +325,10 @@ private struct SentThreadRow: View {
                     Text(thread.recipient.map { $0.fullName } ?? "Someone").tw(.sm, .semibold).foregroundStyle(Palette.gray900)
                     Spacer(minLength: 0)
                     Text(RelativeTime.shortMonth.format(thread.createdAt)).tw(.xs).foregroundStyle(Palette.gray400)
+                    // Reporting here flags their answer.
+                    SafetyMenu(report: ReportRequest(target: .question(thread.id), author: thread.recipient.map {
+                        BlockCandidate(id: $0.id, name: $0.fullName.nilIfEmpty ?? "this member")
+                    }), onReport: onReport, onBlock: onBlock, size: 14)
                 }
                 .padding(.bottom, 2)
                 Text(thread.question).tw(.sm, leading: .snug).foregroundStyle(Palette.gray700)

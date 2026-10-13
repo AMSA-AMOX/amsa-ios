@@ -2,8 +2,12 @@
 import SwiftUI
 
 struct CompareView: View {
+    /// Opened from the Colleges bottom bar rather than pushed: links back to Colleges just close the sheet.
+    var inSheet = false
+
     @Environment(CollegesStore.self) private var store
     @Environment(Router.self) private var router
+    @Environment(\.dismiss) private var dismiss
 
     private static let maxCustomColumns = 6
     private static let statusOptions: [(value: String, label: String, dot: Color)] = [
@@ -46,7 +50,8 @@ struct CompareView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 32)
+            .padding(.top, inSheet ? 32 : 8)
+            .padding(.bottom, 32)
         }
         .onAppear {
             store.load()
@@ -91,7 +96,7 @@ struct CompareView: View {
     }
 
     private var addSchoolsLink: some View {
-        Button { router.navigate(to: .colleges) } label: {
+        Button { open(.colleges) } label: {
             Text("+ Add Schools").tw(.sm, .medium).foregroundStyle(Palette.white)
                 .padding(.horizontal, 14).padding(.vertical, 6)
                 .background(RoundedRectangle(cornerRadius: TW.radiusSm).fill(Palette.navy))
@@ -124,7 +129,7 @@ struct CompareView: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 384)
                 .padding(.bottom, 24)
-            Button { router.navigate(to: .colleges) } label: {
+            Button { open(.colleges) } label: {
                 Text("Browse Schools →").tw(.sm, .medium).foregroundStyle(Palette.white)
                     .padding(.horizontal, 16).padding(.vertical, 8)
                     .background(RoundedRectangle(cornerRadius: TW.radiusSm).fill(Palette.navy))
@@ -231,7 +236,7 @@ struct CompareView: View {
         }
         .draggable(String(id))
 
-        bodyCell(id, isLast: isLast) { SchoolCell(college: college) { router.navigate(to: .collegeDetail(id: id)) } }
+        bodyCell(id, isLast: isLast) { SchoolCell(college: college) { open(.collegeDetail(id: id)) } }
         bodyCell(id, isLast: isLast) { numberText(college.nationalRank.map { "#\($0)" } ?? "—") }
         bodyCell(id, isLast: isLast) { numberText(Formatters.money(college.roomAndBoard)) }
         bodyCell(id, isLast: isLast) { numberText(Formatters.money(college.tuition)) }
@@ -355,6 +360,15 @@ struct CompareView: View {
                 Text("Clear journal").tw(.xs).foregroundStyle(Palette.gray300)
             }
             .buttonStyle(.plain)
+        }
+    }
+
+    private func open(_ route: Route) {
+        if inSheet {
+            dismiss()
+            if route != .colleges { router.navigate(to: route) }
+        } else {
+            router.navigate(to: route)
         }
     }
 

@@ -5,6 +5,7 @@ struct ReviewsColumn: View {
     let config: ReviewsConfig
 
     @Environment(SessionStore.self) private var session
+    @Environment(SafetyStore.self) private var safety
 
     @State private var reviews: [Review] = []
     @State private var loading = true
@@ -61,7 +62,7 @@ struct ReviewsColumn: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 32)
                     } else {
-                        ForEach(reviews) { review in
+                        ForEach(reviews.filter { !safety.isHidden($0.userId) }) { review in
                             ReviewItem(review: review, config: config, markingHelpful: markingHelpful.contains(review.id),
                                        onDelete: { id in reviews.removeAll { $0.id == id } },
                                        onHelpful: helpful)
@@ -251,6 +252,8 @@ private struct ReviewItem: View {
     @State private var deleting = false
     @State private var confirmDelete = false
     @State private var lightbox: LightboxItem?
+    @State private var reportRequest: ReportRequest?
+    @State private var blockCandidate: BlockCandidate?
 
     var body: some View {
         let author = review.author
@@ -273,6 +276,11 @@ private struct ReviewItem: View {
                     .disabled(deleting)
                     .opacity(deleting ? 0.4 : 1)
                     .accessibilityLabel("Delete review")
+                }
+                if session.isAuthenticated, review.userId != session.user?.id {
+                    SafetyMenu(report: ReportRequest(target: config.reportTarget(review.id),
+                                                     author: review.userId.map { BlockCandidate(id: $0, name: name) }),
+                               onReport: { reportRequest = $0 }, onBlock: { blockCandidate = $0 }, size: 14)
                 }
             }
             .padding(.bottom, 8)
@@ -321,6 +329,8 @@ private struct ReviewItem: View {
             Button("OK", role: .destructive) { delete() }
         }
         .lightbox($lightbox, backdropOpacity: 0.8)
+        .reportSheet($reportRequest)
+        .blockConfirmation($blockCandidate)
     }
 
     private func delete() {

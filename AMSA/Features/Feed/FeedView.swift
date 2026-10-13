@@ -2,27 +2,31 @@ import SwiftUI
 
 // Port of src/app/(dashboard)/dashboard/feed/page.tsx
 struct FeedView: View {
+    /// Owned by Home's bottom bar.
+    @Binding var selectedTopics: Set<String>
+    @Binding var filterOpen: Bool
+    @Binding var composeOpen: Bool
+
     @Environment(SessionStore.self) private var session
+    @Environment(SafetyStore.self) private var safety
 
     @State private var posts: [PostItem] = []
     @State private var loadingPosts = true
     @State private var error = ""
     @State private var postingMessage = ""
     @State private var appreciating: Set<Int> = []
-    @State private var postOpen = false
     @State private var followingIds: Set<Int> = []
     @State private var followingInProgress: Set<Int> = []
     @State private var deleting: Set<Int> = []
-    @State private var reportedIds: Set<Int> = []
-    @State private var selectedTopics: Set<String> = []
-    @State private var filterOpen = false
+    @State private var reportRequest: ReportRequest?
+    @State private var blockCandidate: BlockCandidate?
     @State private var dropdown = DropdownController()
 
     private var role: String? { session.role }
     private var canPost: Bool { role == Role.usMember || role == Role.admin || role == Role.boardMember }
-    private var canSeeTopActions: Bool { role != Role.member }
 
     private var filteredPosts: [PostItem] {
+        let posts = posts.filter { !safety.isHidden($0.author?.id) }
         guard !selectedTopics.isEmpty else { return posts }
         return posts.filter { post in
             (post.topic ?? "").split(separator: ",").map { String($0).trimmed }.contains { selectedTopics.contains($0) }
@@ -32,13 +36,6 @@ struct FeedView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                topicFilter.padding(.bottom, 20)
-
-                if canSeeTopActions {
-                    ComposerTrigger(text: "Share something with the community...") { postOpen = true }
-                        .padding(.bottom, 24)
-                }
-
                 if !error.isEmpty {
                     Banner(text: error, style: .error).padding(.bottom, 16)
                 }
@@ -49,8 +46,10 @@ struct FeedView: View {
                 postList
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 32)
+            .padding(.top, 8)
+            .padding(.bottom, 24)
         }
+        .refreshable { await loadPosts(refreshing: true) }
         .environment(dropdown)
         .dropdownHost(dropdown)
         .task {
@@ -59,12 +58,15 @@ struct FeedView: View {
             await posts.value
             await following.value
         }
-        .webModal(isPresented: $postOpen) {
+        .webModal(isPresented: $composeOpen) {
             PostComposer(canPost: canPost,
                          cannotPostMessage: "Only US members, board members, and admins can post.",
                          onCreated: onCreated,
-                         onClose: { postOpen = false })
+                         onClose: { composeOpen = false })
         }
+        .sheet(isPresented: $filterOpen) { topicSheet }
+        .reportSheet($reportRequest)
+        .blockConfirmation($blockCandidate)
     }
 
     @ViewBuilder
@@ -85,7 +87,8 @@ struct FeedView: View {
         let canDelete = isMine || role == Role.admin || role == Role.boardMember
         let onFollow: ((Int) -> Void)? = isMine ? nil : { follow($0) }
         let onDelete: ((Int) -> Void)? = canDelete ? { delete($0) } : nil
-        let onReport: ((Int) -> Void)? = isMine ? nil : { report($0) }
+        let onReport: ((Int) -> Void)? = isMine ? nil : { _ in report(post) }
+        let onBlock: ((BlockCandidate) -> Void)? = isMine ? nil : { blockCandidate = $0 }
         return PostCard(
             post: post,
             onAppreciate: { appreciate($0) },
@@ -96,35 +99,20 @@ struct FeedView: View {
             followingInProgress: post.author.map { followingInProgress.contains($0.id) } ?? false,
             onDelete: onDelete,
             deleting: deleting.contains(post.id),
-            onReport: onReport
+            onReport: onReport,
+            onBlock: onBlock
         )
     }
 
     // MARK: Filter
 
-    private var topicFilter: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Button { filterOpen.toggle() } label: {
-                HStack(spacing: 6) {
-                    Icon("adjustments", size: 24).foregroundStyle(Palette.gray500)
-                    if !selectedTopics.isEmpty {
-                        Text("· \(selectedTopics.count)").tw(.sm, .semibold).foregroundStyle(Palette.gray700)
-                    }
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .twBox(background: Palette.white, radius: TW.dashboardButtonRadius, border: Palette.gray300, borderWidth: 2)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Filter topics")
-
-            if filterOpen {
-                FlowLayout(spacing: 8) {
-                    FilterChip(label: "All", selected: selectedTopics.isEmpty) { selectedTopics = [] }
-                    ForEach(StaticData.constants.postTopics, id: \.self) { topic in
-                        FilterChip(label: topic, selected: selectedTopics.contains(topic)) {
-                            if selectedTopics.contains(topic) { selectedTopics.remove(topic) } else { selectedTopics.insert(topic) }
-                        }
+    private var topicSheet: some View {
+        ChromeSheet(title: "Topics", onReset: selectedTopics.isEmpty ? nil : { selectedTopics = [] }) {
+            FlowLayout(spacing: 8) {
+                FilterChip(label: "All", selected: selectedTopics.isEmpty) { selectedTopics = [] }
+                ForEach(StaticData.constants.postTopics, id: \.self) { topic in
+                    FilterChip(label: topic, selected: selectedTopics.contains(topic)) {
+                        if selectedTopics.contains(topic) { selectedTopics.remove(topic) } else { selectedTopics.insert(topic) }
                     }
                 }
             }
@@ -133,14 +121,15 @@ struct FeedView: View {
 
     // MARK: Data
 
-    private func loadPosts() async {
-        loadingPosts = true
+    /// Pull-to-refresh keeps the current posts on screen instead of the skeleton.
+    private func loadPosts(refreshing: Bool = false) async {
+        if !refreshing { loadingPosts = true }
         error = ""
         do {
             posts = try await session.api.send(PostsAPI.list(limit: 40)).posts ?? []
         } catch let e {
             error = e.apiMessage ?? "Failed to load posts."
-            posts = []
+            if !refreshing { posts = [] }
         }
         loadingPosts = false
     }
@@ -199,20 +188,11 @@ struct FeedView: View {
         }
     }
 
-    private func report(_ postId: Int) {
-        guard !reportedIds.contains(postId) else { return }
-        reportedIds.insert(postId)
-        Task {
-            do {
-                _ = try await session.api.send(PostsAPI.report(postId))
-                postingMessage = "Post reported. Thank you for keeping AMSA safe."
-            } catch {
-                reportedIds.remove(postId)
-                postingMessage = "Failed to submit report. Please try again."
-            }
-            try? await Task.sleep(for: .seconds(4))
-            postingMessage = ""
+    private func report(_ post: PostItem) {
+        let author = post.author.map {
+            BlockCandidate(id: $0.id, name: "\($0.firstName ?? "") \($0.lastName ?? "")".trimmed.nilIfEmpty ?? "this member")
         }
+        reportRequest = ReportRequest(target: .post(post.id), author: author)
     }
 
     private func onCreated(_ post: PostItem) {
@@ -222,7 +202,7 @@ struct FeedView: View {
         } else {
             postingMessage = "Post submitted for approval. It will appear on feed once approved."
         }
-        postOpen = false
+        composeOpen = false
     }
 
     private func update(_ id: Int, _ mutate: (inout PostItem) -> Void) {
@@ -248,27 +228,6 @@ struct FilterChip: View {
                 .padding(.vertical, 6)
                 .twBox(background: selected ? Palette.gray200 : Palette.white, radius: radius,
                        border: selected ? Palette.gray500 : Palette.gray300, borderWidth: 2)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
-/// The "Share something…" / "Ask something…" trigger bar.
-struct ComposerTrigger: View {
-    let text: String
-    let action: () -> Void
-    @Environment(SessionStore.self) private var session
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Avatar(imageURL: session.user?.profilePic, initials: session.user?.initials ?? "", size: 48, fontSize: .lg)
-                Text(text).tw(.lg).foregroundStyle(Palette.gray400).lineLimit(1)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .twBox(background: Palette.white, radius: TW.dashboardButtonRadius, border: Palette.gray300, borderWidth: 2)
         }
         .buttonStyle(.plain)
     }
