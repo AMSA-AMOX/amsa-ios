@@ -94,6 +94,21 @@ struct RouterTests {
         #expect(router.path.isEmpty)
     }
 
+    @Test func notificationsOpenOverTheTabs() {
+        let router = Router()
+        router.navigate(to: .profile())
+        router.navigate(to: .notifications)
+        #expect(router.inboxOpen && router.path.isEmpty && router.current == .notifications)
+        router.navigate(to: .memberProfile(id: 1))
+        router.pop()
+        #expect(router.inboxOpen && router.current == .notifications)
+        router.pop()
+        #expect(!router.inboxOpen && router.current == .feed)
+        router.navigate(to: .notifications)
+        router.navigate(to: .colleges)
+        #expect(!router.inboxOpen && router.current == .colleges)
+    }
+
     @Test func backPopsWhenTargetIsUnderneath() {
         let router = Router()
         router.navigate(to: .places)

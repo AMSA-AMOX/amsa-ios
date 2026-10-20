@@ -1,8 +1,8 @@
 import SwiftUI
 import UIKit
 
-/// The pill bar under every tab: profile avatar, the four tabs, notifications. The selected tab
-/// expands to show its name; Profile and Notifications open as pushed screens.
+/// The pill bar under every tab: notifications, the four tabs, profile avatar. The selected tab
+/// expands to show its name; Profile opens as a pushed screen, Notifications as a panel from the left.
 struct TabBar: View {
     @Environment(Router.self) private var router
     @Environment(SessionStore.self) private var session
@@ -11,14 +11,14 @@ struct TabBar: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            avatar.padding(.trailing, 4)
-            ForEach(Router.Tab.allCases, id: \.self) { tab in
-                pill(tab)
-            }
             ChromeCircleButton(systemImage: "bell", label: "Notifications", size: Chrome.navHeight,
                                badge: shell.shell?.unseenNotifications ?? 0) {
                 router.navigate(to: .notifications)
             }
+            ForEach(Router.Tab.allCases, id: \.self) { tab in
+                pill(tab)
+            }
+            avatar.padding(.leading, 4)
         }
     }
 

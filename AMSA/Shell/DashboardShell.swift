@@ -29,12 +29,15 @@ struct DashboardShell: View {
         }
         .onChange(of: scenePhase) { _, phase in if phase == .active { shell.load() } }
         .onChange(of: router.tab) { _, _ in shell.load() }
-        .onChange(of: router.path.count) { _, _ in
-            // Like a tab switch: drop the keyboard, or a top-bar search field keeps focus under the
-            // pushed screen and comes back with the keyboard up and the tab bar hidden.
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-            shell.load()
-        }
+        .onChange(of: router.path.count) { _, _ in screenChanged() }
+        .onChange(of: router.inboxOpen) { _, _ in screenChanged() }
+    }
+
+    private func screenChanged() {
+        // Like a tab switch: drop the keyboard, or a top-bar search field keeps focus under the
+        // pushed screen and comes back with the keyboard up and the tab bar hidden.
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        shell.load()
     }
 }
 
@@ -61,6 +64,13 @@ private struct TabRoot: View {
         .safeAreaInset(edge: .top, spacing: 0) { MembershipReminderBanner() }
         // Hidden while typing, as a system tab bar sits under the keyboard, rather than riding up on top of it.
         .floatingBottomBar { if !keyboardVisible { TabBar() } }
+        .accessibilityHidden(router.inboxOpen)
+        .overlay {
+            ZStack {
+                if router.inboxOpen { InboxPanel().transition(.move(edge: .leading)) }
+            }
+            .animation(.smooth(duration: 0.35), value: router.inboxOpen)
+        }
         .background(Palette.gray50)
         .toolbar(.hidden, for: .navigationBar)
         .onChange(of: router.tab, initial: true) { _, tab in visited.insert(tab) }
@@ -109,6 +119,38 @@ private struct PushedScreen: View {
         if route.isDetail { return "" }
         if case .profile = route { return "" }
         return route.title
+    }
+}
+
+/// Notifications, over the tabs and their bars. They slide in from the left, the side the bell is
+/// on, and close with Back or a swipe from the right edge, mirroring a pushed screen's edge swipe.
+private struct InboxPanel: View {
+    @Environment(Router.self) private var router
+    @State private var dragOffset: CGFloat = 0
+
+    var body: some View {
+        PushedScreen(route: .notifications)
+            .background(Palette.gray50.ignoresSafeArea())
+            .offset(x: dragOffset)
+            // Stays put while the panel follows the finger; as wide as the content's side padding.
+            .overlay(alignment: .trailing) {
+                Color.clear
+                    .frame(width: 16)
+                    .contentShape(Rectangle())
+                    .gesture(swipeBack)
+            }
+    }
+
+    private var swipeBack: some Gesture {
+        DragGesture(minimumDistance: 10, coordinateSpace: .global)
+            .onChanged { dragOffset = min(0, $0.translation.width) }
+            .onEnded { value in
+                if value.translation.width < -100 || value.predictedEndTranslation.width < -200 {
+                    router.pop()
+                } else {
+                    withAnimation(.smooth(duration: 0.25)) { dragOffset = 0 }
+                }
+            }
     }
 }
 
