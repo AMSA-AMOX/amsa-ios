@@ -4,12 +4,27 @@ import Foundation
 enum Social {
     enum Platform { case x, linkedin, instagram, facebook }
 
-    /// `socialHref` — prepend https:// when missing.
-    static func href(_ value: String) -> String {
+    /// `socialHref` — prepend https:// when missing. Unlike the web, whose link for a bare handle
+    /// goes nowhere, a handle ("@john", "john.doe") becomes the platform's profile link.
+    static func href(_ value: String, platform: Platform) -> String {
         let v = value.trimmed
         if v.range(of: #"^https?://"#, options: [.regularExpression, .caseInsensitive]) != nil { return v }
-        if v.hasPrefix("@") { return String(v.dropFirst()) } // bare handle isn't a valid URL on its own
+        if isBareHandle(v) {
+            let handle = v.hasPrefix("@") ? String(v.dropFirst()) : v
+            let base = switch platform {
+            case .x: "https://x.com/"
+            case .linkedin: "https://www.linkedin.com/in/"
+            case .instagram: "https://www.instagram.com/"
+            case .facebook: "https://www.facebook.com/"
+            }
+            return base + (handle.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? handle)
+        }
         return "https://\(v)"
+    }
+
+    /// "@john" or "john.doe" rather than a link.
+    private static func isBareHandle(_ raw: String) -> Bool {
+        !raw.contains("/") && !raw.contains(".com") && !raw.contains("http")
     }
 
     /// `socialHandle` — a readable handle from a stored link.
@@ -25,7 +40,7 @@ enum Social {
         guard !raw.isEmpty else { return fallback }
 
         // Bare handle already (e.g. "@john" or "john.doe")
-        if !raw.contains("/"), !raw.contains(".com"), !raw.contains("http") {
+        if isBareHandle(raw) {
             let h = raw.hasPrefix("@") ? String(raw.dropFirst()) : raw
             return platform == .x || platform == .instagram ? "@\(h)" : h
         }

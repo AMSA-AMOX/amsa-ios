@@ -33,6 +33,13 @@ final class ExternalLinkPresenter {
         open(url)
     }
 
+    /// Hands the link to the system instead, so a universal link opens its app when installed
+    /// (a LinkedIn or Instagram profile in LinkedIn or Instagram) and Safari otherwise.
+    func openOutsideApp(_ string: String?) {
+        guard let string, let url = URL(string: string) else { return }
+        UIApplication.shared.open(url)
+    }
+
     private static func topViewController() -> UIViewController? {
         let scene = UIApplication.shared.connectedScenes
             .compactMap { $0 as? UIWindowScene }
