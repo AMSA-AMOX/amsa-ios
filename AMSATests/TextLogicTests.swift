@@ -43,14 +43,18 @@ struct FormattersTests {
 @Suite("Social — expected values from src/lib/social.ts")
 struct SocialTests {
     @Test(arguments: [
-        ("instagram.com/x", "https://instagram.com/x"),
-        ("https://a.com/p", "https://a.com/p"),
-        ("@john", "john"),
-        ("  http://b.com  ", "http://b.com"),
-        ("HTTPS://C.COM", "HTTPS://C.COM"),
-    ])
-    func href(value: String, expected: String) {
-        #expect(Social.href(value) == expected)
+        ("instagram.com/x", Social.Platform.instagram, "https://instagram.com/x"),
+        ("https://a.com/p", .x, "https://a.com/p"),
+        ("  http://b.com  ", .facebook, "http://b.com"),
+        ("HTTPS://C.COM", .linkedin, "HTTPS://C.COM"),
+        // App-only: the web links a bare handle nowhere.
+        ("@john", .instagram, "https://www.instagram.com/john"),
+        ("@jd", .x, "https://x.com/jd"),
+        ("john.doe", .linkedin, "https://www.linkedin.com/in/john.doe"),
+        (" jane.d ", .facebook, "https://www.facebook.com/jane.d"),
+    ] as [(String, Social.Platform, String)])
+    func href(value: String, platform: Social.Platform, expected: String) {
+        #expect(Social.href(value, platform: platform) == expected)
     }
 
     @Test(arguments: [

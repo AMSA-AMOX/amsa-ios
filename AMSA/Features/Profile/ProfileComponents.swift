@@ -69,7 +69,7 @@ struct SocialLinksList: View {
     @ViewBuilder
     private func row(_ value: String?, icon: String, color: Color, platform: Social.Platform) -> some View {
         if let value, !value.isEmpty {
-            Button { links.open(Social.href(value)) } label: {
+            Button { links.openOutsideApp(Social.href(value, platform: platform)) } label: {
                 HStack(spacing: 8) {
                     Icon(icon, size: 16).foregroundStyle(color)
                     Text(Social.handle(value, platform: platform)).tw(.sm).foregroundStyle(Palette.gray600).lineLimit(1)

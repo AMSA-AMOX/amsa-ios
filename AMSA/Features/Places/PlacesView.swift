@@ -113,7 +113,7 @@ struct PlacesView: View {
             .padding(.bottom, 16)
         }
         .scrollDismissesKeyboard(.interactively)
-        .floatingBottomBar {
+        .pinnedTopBar {
             HStack(spacing: 10) {
                 ChromeCircleButton(systemImage: "line.3.horizontal.decrease", label: "Filters",
                                    active: !colTiers.isEmpty || !transit.isEmpty) { filterOpen = true }

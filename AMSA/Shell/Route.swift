@@ -129,7 +129,7 @@ enum Route: Hashable, Sendable {
     }
 }
 
-/// Navigation state for the dashboard shell: four top-bar tabs, with every other screen pushed on top.
+/// Navigation state for the dashboard shell: four tabs in the bottom tab bar, with every other screen pushed on top.
 @MainActor
 @Observable
 final class Router {
@@ -137,13 +137,16 @@ final class Router {
         case home, network, colleges, places
     }
 
-    /// Home shows the Feed or Threads, switched from its bottom bar.
+    /// Home shows the Feed or Threads, switched from its top bar.
     enum HomeMode: Hashable, Sendable {
         case feed, threads
     }
 
     var tab: Tab = .home
     var homeMode: HomeMode = .feed
+    /// Notifications open over the tabs instead of being pushed, so they can slide in from the left,
+    /// the side the bell is on. Screens opened from them are pushed on top as usual.
+    var inboxOpen = false
     var path: [Route] = []
 
     /// The route the visible tab shows.
@@ -156,16 +159,23 @@ final class Router {
         }
     }
 
-    var current: Route { path.last ?? tabRoute }
+    /// The screen under the pushed stack.
+    private var root: Route { inboxOpen ? .notifications : tabRoute }
+
+    var current: Route { path.last ?? root }
 
     /// `router.push(href)` / `<Link href>`. Tab routes switch tabs and clear the stack; a screen
     /// that is already open (Profile, Settings, …) is popped back to; anything else is pushed.
     func navigate(to route: Route) {
         if let tab = route.tab {
             path = []
+            inboxOpen = false
             self.tab = tab
             if route == .feed { homeMode = .feed }
             if route == .threads { homeMode = .threads }
+        } else if route == .notifications {
+            path = []
+            inboxOpen = true
         } else if !route.isDetail, let index = path.firstIndex(where: { $0.webPath == route.webPath }) {
             path = Array(path[..<index]) + [route]
         } else {
@@ -179,13 +189,13 @@ final class Router {
 
     /// The header back button and edge swipe.
     func pop() {
-        if !path.isEmpty { path.removeLast() }
+        if !path.isEmpty { path.removeLast() } else { inboxOpen = false }
     }
 
     /// In-page "Back to X" links: pop when X is underneath, otherwise go to X.
     func back(to route: Route) {
         if !path.isEmpty {
-            let below = path.count >= 2 ? path[path.count - 2] : tabRoute
+            let below = path.count >= 2 ? path[path.count - 2] : root
             if below.webPath == route.webPath {
                 path.removeLast()
                 return
@@ -203,6 +213,7 @@ final class Router {
     func reset() {
         tab = .home
         homeMode = .feed
+        inboxOpen = false
         path = []
     }
 }

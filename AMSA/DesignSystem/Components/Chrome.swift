@@ -1,13 +1,13 @@
 import SwiftUI
 
-// App chrome: the top tab bar, screen headers and per-tab bottom bars. Not ported from the
+// App chrome: the bottom tab bar, screen headers and per-tab top bars. Not ported from the
 // web — the app's own navigation, modeled on floating pill bars.
 
 enum Chrome {
-    /// Height of every pill and circle in the top bar and screen headers.
-    static let topHeight: CGFloat = 44
-    /// Height of every control in the bottom bars.
-    static let bottomHeight: CGFloat = 48
+    /// Height of every pill and circle in the tab bar and screen headers.
+    static let navHeight: CGFloat = 44
+    /// Height of every control in the tabs' top bars.
+    static let toolbarHeight: CGFloat = 48
     static let spring = Animation.spring(response: 0.38, dampingFraction: 0.82)
 }
 
@@ -46,6 +46,9 @@ extension View {
     func pinnedTopBar<Bar: View>(@ViewBuilder _ bar: () -> Bar) -> some View {
         safeAreaInset(edge: .top, spacing: 0) {
             bar()
+                .padding(.horizontal, 16)
+                .padding(.top, 6)
+                .padding(.bottom, 10)
                 .background(alignment: .top) {
                     VStack(spacing: 0) {
                         Palette.gray50
@@ -79,7 +82,7 @@ struct CountBadge: View {
 struct ChromeCircleButton: View {
     let systemImage: String
     let label: String
-    var size: CGFloat = Chrome.bottomHeight
+    var size: CGFloat = Chrome.toolbarHeight
     var badge: Int = 0
     /// Navy fill, for a control whose filter or search is active.
     var active = false
@@ -112,7 +115,7 @@ struct ChromePressStyle: ButtonStyle {
     }
 }
 
-/// The capsule search field used in the bottom bars.
+/// The capsule search field used in the tabs' top bars.
 struct ChromeSearchField: View {
     let placeholder: String
     @Binding var text: String
@@ -143,7 +146,7 @@ struct ChromeSearchField: View {
             }
         }
         .padding(.horizontal, 16)
-        .frame(height: Chrome.bottomHeight)
+        .frame(height: Chrome.toolbarHeight)
         .chromeSurface(Capsule())
         .contentShape(Capsule())
         .onTapGesture { focused.wrappedValue = true }

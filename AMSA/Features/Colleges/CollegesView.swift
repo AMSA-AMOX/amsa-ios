@@ -65,7 +65,7 @@ struct CollegesView: View {
             .padding(.bottom, 24)
         }
         .scrollDismissesKeyboard(.interactively)
-        .floatingBottomBar { bottomBar }
+        .pinnedTopBar { topBar }
         .sheet(isPresented: $filtersOpen) {
             ChromeSheet(title: "Filters", onReset: filters.activeCount > 0 ? { resetFilters() } : nil) {
                 FiltersForm(filters: $filters, fieldOptions: ResearchFilters.fieldOptions(store.colleges))
@@ -80,9 +80,9 @@ struct CollegesView: View {
         .onChange(of: filters) { _, _ in currentPage = 1 }
     }
 
-    // MARK: Bottom bar — filters · compare · search
+    // MARK: Top bar — filters · compare · search
 
-    private var bottomBar: some View {
+    private var topBar: some View {
         HStack(spacing: 10) {
             ChromeCircleButton(systemImage: "line.3.horizontal.decrease", label: "Filters",
                                active: filters.activeCount > 0) { filtersOpen = true }
@@ -118,7 +118,7 @@ struct CollegesView: View {
             }
             .foregroundStyle(Palette.gray800)
             .frame(maxWidth: .infinity)
-            .frame(height: Chrome.bottomHeight)
+            .frame(height: Chrome.toolbarHeight)
             .chromeSurface(Capsule())
             .contentShape(Capsule())
         }

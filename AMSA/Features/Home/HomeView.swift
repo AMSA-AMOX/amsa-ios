@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The Home tab: Feed and Threads, switched from the bottom bar, with filter (left) and compose (right).
+/// The Home tab: Feed and Threads, switched from the top bar, with filter (left) and compose (right).
 struct HomeView: View {
     @Environment(Router.self) private var router
     @Environment(SessionStore.self) private var session
@@ -29,7 +29,7 @@ struct HomeView: View {
                     .modifier(ModeVisibility(visible: mode == .threads))
             }
         }
-        .floatingBottomBar { bar }
+        .pinnedTopBar { bar }
         .onChange(of: router.homeMode, initial: true) { _, newMode in
             if newMode == .threads { threadsVisited = true }
         }
@@ -56,7 +56,7 @@ struct HomeView: View {
             segment(.threads, title: "Threads", symbol: "bubble.left.and.bubble.right")
         }
         .padding(4)
-        .frame(height: Chrome.bottomHeight)
+        .frame(height: Chrome.toolbarHeight)
         .frame(maxWidth: .infinity)
         .chromeSurface(Capsule())
     }

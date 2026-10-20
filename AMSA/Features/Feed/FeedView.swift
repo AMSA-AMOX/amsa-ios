@@ -2,7 +2,7 @@ import SwiftUI
 
 // Port of src/app/(dashboard)/dashboard/feed/page.tsx
 struct FeedView: View {
-    /// Owned by Home's bottom bar.
+    /// Owned by Home's top bar.
     @Binding var selectedTopics: Set<String>
     @Binding var filterOpen: Bool
     @Binding var composeOpen: Bool
