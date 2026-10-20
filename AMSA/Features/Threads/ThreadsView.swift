@@ -2,7 +2,7 @@ import SwiftUI
 
 // Port of src/app/(dashboard)/dashboard/threads/page.tsx
 struct ThreadsView: View {
-    /// Owned by Home's bottom bar.
+    /// Owned by Home's top bar.
     @Binding var activeCategory: String
     @Binding var filterOpen: Bool
     @Binding var composeOpen: Bool

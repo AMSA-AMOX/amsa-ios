@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// The signed-in app: a tab root (top pill bar + the selected tab) with every other screen pushed on top.
+/// The signed-in app: a tab root (the selected tab + the bottom tab bar) with every other screen pushed on top.
 struct DashboardShell: View {
     @Environment(Router.self) private var router
     @Environment(ShellStore.self) private var shell
@@ -30,8 +30,8 @@ struct DashboardShell: View {
         .onChange(of: scenePhase) { _, phase in if phase == .active { shell.load() } }
         .onChange(of: router.tab) { _, _ in shell.load() }
         .onChange(of: router.path.count) { _, _ in
-            // Like a tab switch: drop the keyboard, or a bottom-bar search field keeps focus under the
-            // pushed screen and comes back with the keyboard up and the bar hidden behind it.
+            // Like a tab switch: drop the keyboard, or a top-bar search field keeps focus under the
+            // pushed screen and comes back with the keyboard up and the tab bar hidden.
             UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             shell.load()
         }
@@ -43,6 +43,7 @@ struct DashboardShell: View {
 private struct TabRoot: View {
     @Environment(Router.self) private var router
     @State private var visited: Set<Router.Tab> = []
+    @State private var keyboardVisible = false
 
     var body: some View {
         ZStack {
@@ -56,15 +57,19 @@ private struct TabRoot: View {
                 }
             }
         }
-        .pinnedTopBar {
-            VStack(spacing: 0) {
-                TopNavBar()
-                MembershipReminderBanner()
-            }
-        }
+        // Above each tab's own top bar, whose background runs up behind it.
+        .safeAreaInset(edge: .top, spacing: 0) { MembershipReminderBanner() }
+        // Hidden while typing, as a system tab bar sits under the keyboard, rather than riding up on top of it.
+        .floatingBottomBar { if !keyboardVisible { TabBar() } }
         .background(Palette.gray50)
         .toolbar(.hidden, for: .navigationBar)
         .onChange(of: router.tab, initial: true) { _, tab in visited.insert(tab) }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
+            keyboardVisible = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in
+            keyboardVisible = false
+        }
     }
 
     @ViewBuilder
@@ -90,7 +95,7 @@ private struct PushedScreen: View {
             .pinnedTopBar {
                 ScreenHeader(title: headerTitle) {
                     if case .profile = route {
-                        ChromeCircleButton(systemImage: "gearshape", label: "Settings", size: Chrome.topHeight,
+                        ChromeCircleButton(systemImage: "gearshape", label: "Settings", size: Chrome.navHeight,
                                            badge: shell.pendingReviewCount(role: session.role)) {
                             router.navigate(to: .settings)
                         }

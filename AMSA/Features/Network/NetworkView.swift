@@ -78,7 +78,7 @@ struct NetworkView: View {
             searchTask?.cancel()
             if query.trimmed.isEmpty { await loadDiscovery() } else { await runSearch(query) }
         }
-        .floatingBottomBar {
+        .pinnedTopBar {
             ChromeSearchField(placeholder: "Search by name or school...", text: $query, focused: $searchFocused)
         }
         .task { await loadDiscovery() }

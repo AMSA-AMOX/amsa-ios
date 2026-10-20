@@ -2,7 +2,7 @@
 import SwiftUI
 
 struct CompareView: View {
-    /// Opened from the Colleges bottom bar rather than pushed: links back to Colleges just close the sheet.
+    /// Opened from the Colleges top bar rather than pushed: links back to Colleges just close the sheet.
     var inSheet = false
 
     @Environment(CollegesStore.self) private var store

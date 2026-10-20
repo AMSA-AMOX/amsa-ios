@@ -1,9 +1,9 @@
 import SwiftUI
 import UIKit
 
-/// The pill bar above every tab: profile avatar, the four tabs, notifications. The selected tab
+/// The pill bar under every tab: profile avatar, the four tabs, notifications. The selected tab
 /// expands to show its name; Profile and Notifications open as pushed screens.
-struct TopNavBar: View {
+struct TabBar: View {
     @Environment(Router.self) private var router
     @Environment(SessionStore.self) private var session
     @Environment(ShellStore.self) private var shell
@@ -15,20 +15,17 @@ struct TopNavBar: View {
             ForEach(Router.Tab.allCases, id: \.self) { tab in
                 pill(tab)
             }
-            ChromeCircleButton(systemImage: "bell", label: "Notifications", size: Chrome.topHeight,
+            ChromeCircleButton(systemImage: "bell", label: "Notifications", size: Chrome.navHeight,
                                badge: shell.shell?.unseenNotifications ?? 0) {
                 router.navigate(to: .notifications)
             }
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 6)
-        .padding(.bottom, 10)
     }
 
     private var avatar: some View {
         let user = session.user
         return Button { router.navigate(to: .profile()) } label: {
-            Avatar(imageURL: user?.profilePic, initials: user?.initials ?? "", size: Chrome.topHeight - 4, fontSize: .sm)
+            Avatar(imageURL: user?.profilePic, initials: user?.initials ?? "", size: Chrome.navHeight - 4, fontSize: .sm)
                 .padding(2)
                 .overlay(Circle().stroke(Palette.gray200, lineWidth: 1))
         }
@@ -60,7 +57,7 @@ struct TopNavBar: View {
             }
             .foregroundStyle(selected ? Palette.white : Palette.gray700)
             .padding(.horizontal, selected ? 12 : 0)
-            .frame(width: selected ? nil : Chrome.topHeight, height: Chrome.topHeight)
+            .frame(width: selected ? nil : Chrome.navHeight, height: Chrome.navHeight)
             .frame(maxWidth: selected ? .infinity : nil)
             .background {
                 if selected {
@@ -124,7 +121,7 @@ struct ScreenHeader<Trailing: View>: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ChromeCircleButton(systemImage: "chevron.left", label: "Back", size: Chrome.topHeight) { router.pop() }
+            ChromeCircleButton(systemImage: "chevron.left", label: "Back", size: Chrome.navHeight) { router.pop() }
             Spacer(minLength: 0)
             trailing
         }
@@ -133,12 +130,9 @@ struct ScreenHeader<Trailing: View>: View {
                 .tw(.base, .semibold)
                 .foregroundStyle(Palette.gray900)
                 .lineLimit(1)
-                .padding(.horizontal, Chrome.topHeight + 24)
+                .padding(.horizontal, Chrome.navHeight + 24)
                 .accessibilityAddTraits(.isHeader)
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 6)
-        .padding(.bottom, 10)
     }
 }
 

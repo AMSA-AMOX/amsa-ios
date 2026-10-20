@@ -129,7 +129,7 @@ enum Route: Hashable, Sendable {
     }
 }
 
-/// Navigation state for the dashboard shell: four top-bar tabs, with every other screen pushed on top.
+/// Navigation state for the dashboard shell: four tabs in the bottom tab bar, with every other screen pushed on top.
 @MainActor
 @Observable
 final class Router {
@@ -137,7 +137,7 @@ final class Router {
         case home, network, colleges, places
     }
 
-    /// Home shows the Feed or Threads, switched from its bottom bar.
+    /// Home shows the Feed or Threads, switched from its top bar.
     enum HomeMode: Hashable, Sendable {
         case feed, threads
     }
