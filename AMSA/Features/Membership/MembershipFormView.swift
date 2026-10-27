@@ -21,7 +21,6 @@ struct MembershipForm: Equatable {
     var eventIdeas = ""
     var heardAboutAmsa = ""
     var heardAboutAmsaOther = ""
-    var agreesToEmails = false
 }
 
 private struct MembershipRecord: Decodable, Sendable {
@@ -44,7 +43,6 @@ private struct MembershipRecord: Decodable, Sendable {
     let eventIdeas: String?
     let heardAboutAmsa: String?
     let heardAboutAmsaOther: String?
-    let agreesToEmails: Bool?
     let reviewStatus: String?
 }
 
@@ -67,7 +65,7 @@ private enum MembershipAPI {
             "careerInterestsOther": .string(f.careerInterestsOther), "amsaInterests": .strings(f.amsaInterests),
             "amsaInterestsOther": .string(f.amsaInterestsOther), "mentorshipInterest": .string(f.mentorshipInterest),
             "eventIdeas": .string(f.eventIdeas), "heardAboutAmsa": .string(f.heardAboutAmsa),
-            "heardAboutAmsaOther": .string(f.heardAboutAmsaOther), "agreesToEmails": .bool(f.agreesToEmails),
+            "heardAboutAmsaOther": .string(f.heardAboutAmsaOther),
         ])
     }
     static func match(email: String, name: String) -> Endpoint<EmailCheck> {
@@ -268,12 +266,6 @@ struct MembershipFormView: View {
 
             TWDivider()
 
-            HStack(alignment: .top, spacing: 12) {
-                WebCheckbox(isOn: $form.agreesToEmails, disabled: isLocked).padding(.top, 2)
-                Text("I agree to receive AMSA emails and updates.").tw(.sm).foregroundStyle(Palette.gray700)
-                    .onTapGesture { if !isLocked { form.agreesToEmails.toggle() } }
-            }
-
             VStack(alignment: .leading, spacing: 12) {
                 if !error.isEmpty { Text(error).tw(.sm).foregroundStyle(Palette.red600) }
                 if !success.isEmpty { Text(success).tw(.sm).foregroundStyle(Palette.green700) }
@@ -390,7 +382,7 @@ struct MembershipFormView: View {
                     careerInterestsOther: m.careerInterestsOther ?? "", amsaInterests: m.amsaInterests ?? [],
                     amsaInterestsOther: m.amsaInterestsOther ?? "", mentorshipInterest: m.mentorshipInterest ?? "",
                     eventIdeas: m.eventIdeas ?? "", heardAboutAmsa: m.heardAboutAmsa ?? "",
-                    heardAboutAmsaOther: m.heardAboutAmsaOther ?? "", agreesToEmails: m.agreesToEmails ?? false)
+                    heardAboutAmsaOther: m.heardAboutAmsaOther ?? "")
                 reviewStatus = m.reviewStatus ?? "pending"
             } else {
                 // First-time applicant: pre-fill from the profile.
