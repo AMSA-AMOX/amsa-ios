@@ -42,7 +42,7 @@ struct MemberProfileView: View {
 
     private var canAskQuestion: Bool {
         guard session.role == Role.member, let profile, profile.id != session.user?.id, !isBlocked else { return false }
-        return profile.roles?.contains { [Role.ambassador, Role.usMember, Role.boardMember].contains($0) } ?? false
+        return profile.roles?.contains { [Role.ambassador, Role.usMember, Role.alum, Role.boardMember].contains($0) } ?? false
     }
 
     var body: some View {
@@ -72,15 +72,7 @@ struct MemberProfileView: View {
         .task { await loadProfile() }
         .webModal(isPresented: $askOpen, backdropOpacity: 0.4) {
             if let profile {
-                AskQuestionModal(recipient: profile, isPresented: $askOpen) { message in
-                    questionMessage = message
-                    if message.ok {
-                        Task {
-                            try? await Task.sleep(for: .seconds(4))
-                            questionMessage = nil
-                        }
-                    }
-                }
+                DirectMessageModal(recipient: profile, isPresented: $askOpen) { questionMessage = $0 }
             }
         }
     }
@@ -116,11 +108,31 @@ struct MemberProfileView: View {
                                               verticalPadding: 6, disabled: unblocking, action: unblock)
                                     .padding(.top, 8)
                             } else {
-                                OutlineButton(title: profile.isFollowing == true ? "Following" : "Follow",
-                                              horizontalPadding: 12, verticalPadding: 6, disabled: followInFlight,
-                                              action: toggleFollow)
-                                    .padding(.top, 8)
+                                HStack(spacing: 8) {
+                                    OutlineButton(title: profile.isFollowing == true ? "Following" : "Follow",
+                                                  horizontalPadding: 12, verticalPadding: 6, disabled: followInFlight,
+                                                  action: toggleFollow)
+                                    if canAskQuestion {
+                                        OutlineButton(title: "Message", horizontalPadding: 12, verticalPadding: 6) {
+                                            askOpen = true
+                                            questionMessage = nil
+                                        }
+                                    }
+                                }
+                                .padding(.top, 8)
                             }
+                        }
+                        // The web closes the modal before its success message can show; surfaced here instead,
+                        // with a way to the Messages screen where the reply will arrive.
+                        if let questionMessage, questionMessage.ok {
+                            Button { router.navigate(to: .inbox) } label: {
+                                (Text(questionMessage.text).foregroundColor(Palette.green600)
+                                    + Text(" View in Messages").foregroundColor(Palette.navy).underline())
+                                    .tw(.sm)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.top, 8)
                         }
                     }
                     Spacer(minLength: 0)
@@ -150,21 +162,6 @@ struct MemberProfileView: View {
                         .padding(.top, 16)
                         .topBorder(Palette.gray100, width: 1)
                         .padding(.top, 16)
-                }
-                if canAskQuestion {
-                    VStack(alignment: .leading, spacing: 8) {
-                        OutlineButton(title: "Ask a Direct Question", fullWidth: true) {
-                            askOpen = true
-                            questionMessage = nil
-                        }
-                        // The web closes the modal before this message can show; surfaced here instead.
-                        if let questionMessage, questionMessage.ok {
-                            Text(questionMessage.text).tw(.sm).foregroundStyle(Palette.green600)
-                        }
-                    }
-                    .padding(.top, 16)
-                    .topBorder(Palette.gray100, width: 1)
-                    .padding(.top, 16)
                 }
             }
         }
@@ -461,7 +458,8 @@ struct QAThreadCard: View {
     }
 }
 
-private struct AskQuestionModal: View {
+/// The web's "Ask a Direct Question" modal. Sent messages are Q&A threads; they're tracked on the Messages screen.
+private struct DirectMessageModal: View {
     let recipient: NetworkProfileResponse.User
     @Binding var isPresented: Bool
     let onResult: ((text: String, ok: Bool)) -> Void
@@ -491,7 +489,7 @@ private struct AskQuestionModal: View {
                 }
                 let disabled = submitting || draft.trimmed.isEmpty
                 Button(action: submit) {
-                    Text(submitting ? "Sending…" : "Ask")
+                    Text(submitting ? "Sending…" : "Send")
                         .tw(.base, .semibold)
                         .foregroundStyle(Palette.white)
                         .padding(.horizontal, 24)
@@ -533,9 +531,9 @@ private struct AskQuestionModal: View {
                 _ = try await session.api.send(QAThreadsAPI.ask(recipientId: recipient.id, question: q))
                 draft = ""
                 isPresented = false
-                onResult(("Your question has been sent!", true))
+                onResult(("Message sent!", true))
             } catch let e {
-                message = (e.apiMessage ?? "Failed to send question.", false)
+                message = (e.apiMessage ?? "Failed to send message.", false)
             }
             submitting = false
         }

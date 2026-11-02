@@ -79,7 +79,15 @@ struct NetworkView: View {
             if query.trimmed.isEmpty { await loadDiscovery() } else { await runSearch(query) }
         }
         .pinnedTopBar {
-            ChromeSearchField(placeholder: "Search by name or school...", text: $query, focused: $searchFocused)
+            HStack(spacing: 10) {
+                ChromeSearchField(placeholder: "Search by name or school...", text: $query, focused: $searchFocused)
+                // Only regular members send direct messages; everyone else answers theirs from Profile.
+                if session.role == Role.member {
+                    ChromeCircleButton(systemImage: "bubble.left.and.bubble.right", label: "Messages") {
+                        router.navigate(to: .inbox)
+                    }
+                }
+            }
         }
         .task { await loadDiscovery() }
         .onChange(of: query) { _, newValue in queryChanged(newValue) }
