@@ -47,7 +47,7 @@ struct DecodingTests {
          "city": "Davis", "major": "CS", "expectedGraduation": 2027, "email": "t@test.edu", "socialMedia": "@t",
          "phone": 5550100, "careerInterests": ["Tech"], "careerInterestsOther": null, "amsaInterests": [],
          "amsaInterestsOther": "Mentoring", "mentorshipInterest": "Yes", "eventIdeas": null,
-         "heardAboutAmsa": "Friend", "heardAboutAmsaOther": null, "agreesToEmails": true,
+         "heardAboutAmsa": "Friend", "heardAboutAmsaOther": null,
          "reviewStatus": "pending", "reviewedAt": null, "reviewedBy": null, "assignedRole": null, "adminNote": null,
          "user": {"id": 9, "email": "t@test.edu", "firstName": "Test", "lastName": "Person", "role": "member",
                   "acceptanceStatus": null},

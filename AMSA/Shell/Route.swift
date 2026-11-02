@@ -64,7 +64,8 @@ enum Route: Hashable, Sendable {
         case .threads: "Threads"
         case .network: "Network"
         case .memberProfile: ""
-        case .inbox: "Inbox"
+        // "Inbox" on the web; renamed so it isn't confused with Notifications, which the tab bar's tray icon opens.
+        case .inbox: "Messages"
         case .blogs: "Blogs"
         case .settings: "Settings"
         case .blockedMembers: "Blocked members"

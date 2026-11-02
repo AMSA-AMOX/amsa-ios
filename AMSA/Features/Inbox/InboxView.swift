@@ -21,16 +21,16 @@ struct InboxView: View {
         threads.filter { !safety.isHidden($0.asker?.id) && !safety.isHidden($0.recipient?.id) }
     }
 
-    /// The server treats ambassadors as recipients too (PATCH/DELETE allow them); the web client omitted
-    /// them, which left ambassadors unable to answer here. Matches the server.
+    /// The server treats ambassadors and alums as recipients too (PATCH/DELETE allow them); the web client
+    /// omitted ambassadors, which left them unable to answer here. Matches the server.
     private var isRecipient: Bool {
-        [Role.usMember, Role.boardMember, Role.admin, Role.ambassador].contains(session.role ?? "")
+        [Role.usMember, Role.boardMember, Role.admin, Role.ambassador, Role.alum].contains(session.role ?? "")
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                Text(isRecipient ? "Questions asked directly to you." : "Questions you've sent to members.")
+                Text(isRecipient ? "Questions asked directly to you." : "Messages you've sent and the replies you've received.")
                     .tw(.sm).foregroundStyle(Palette.gray500)
                     .padding(.top, 4)
                     .padding(.bottom, 24)
@@ -55,10 +55,10 @@ struct InboxView: View {
                     .background(Palette.white)
                 } else if visibleThreads.isEmpty {
                     VStack(spacing: 4) {
-                        Text(isRecipient ? "No questions yet." : "You haven't asked any questions yet.")
+                        Text(isRecipient ? "No questions yet." : "You haven't sent any messages yet.")
                             .tw(.sm, .semibold).foregroundStyle(Palette.gray500)
                         if !isRecipient {
-                            Text("Visit a US member's profile and click \"Ask a Direct Question\".")
+                            Text("Open a US Member's, Ambassador's or Alum's profile in Network and tap Message.")
                                 .tw(.xs).foregroundStyle(Palette.gray400)
                         }
                     }
@@ -88,6 +88,8 @@ struct InboxView: View {
             .padding(.vertical, 24)
         }
         .scrollDismissesKeyboard(.interactively)
+        .refreshable { await load() }
+        // Also reruns when coming back from a member's profile, so new replies show up.
         .task { await load() }
         .reportSheet($reportRequest)
         .blockConfirmation($blockCandidate)
@@ -125,9 +127,9 @@ struct InboxView: View {
 
     // MARK: Data
 
+    /// Skeletons only show on the first load; refreshes keep the list up and keep it if the request fails.
     private func load() async {
-        pageLoading = true
-        threads = (try? await session.api.send(QAThreadsAPI.inbox()))?.threads ?? []
+        if let data = try? await session.api.send(QAThreadsAPI.inbox()) { threads = data.threads ?? [] }
         pageLoading = false
     }
 
@@ -311,18 +313,27 @@ private struct ReceivedThreadRow: View {
     }
 }
 
+/// A member's sent message: who it went to, what they wrote, and the reply once there is one.
 private struct SentThreadRow: View {
     let thread: QAThread
     let onReport: (ReportRequest) -> Void
     let onBlock: (BlockCandidate) -> Void
 
+    @Environment(Router.self) private var router
+
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Circle().fill(thread.status == "pending" ? Palette.navy : .clear).frame(width: 8, height: 8).padding(.top, 8)
-            InboxAvatar(user: thread.recipient)
+            Button(action: openRecipient) { InboxAvatar(user: thread.recipient) }
+                .buttonStyle(.plain)
+                .disabled(thread.recipient == nil)
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 8) {
-                    Text(thread.recipient.map { $0.fullName } ?? "Someone").tw(.sm, .semibold).foregroundStyle(Palette.gray900)
+                    Button(action: openRecipient) {
+                        Text(thread.recipient.map { $0.fullName } ?? "Someone").tw(.sm, .semibold).foregroundStyle(Palette.gray900)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(thread.recipient == nil)
                     Spacer(minLength: 0)
                     Text(RelativeTime.shortMonth.format(thread.createdAt)).tw(.xs).foregroundStyle(Palette.gray400)
                     // Reporting here flags their answer.
@@ -336,12 +347,19 @@ private struct SentThreadRow: View {
                     if let answer = thread.answer, !answer.isEmpty {
                         Text(answer).tw(.sm, leading: .relaxed).foregroundStyle(Palette.gray600)
                     } else {
-                        Text("Awaiting answer…").tw(.sm).italic().foregroundStyle(Palette.gray400)
+                        Text("Awaiting reply…").tw(.sm).italic().foregroundStyle(Palette.gray400)
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading, 12)
+                .overlay(alignment: .leading) { Capsule().fill(Palette.gray200).frame(width: 2) }
                 .padding(.top, 8)
             }
         }
         .padding(16)
+    }
+
+    private func openRecipient() {
+        if let id = thread.recipient?.id { router.navigate(to: .memberProfile(id: id)) }
     }
 }
