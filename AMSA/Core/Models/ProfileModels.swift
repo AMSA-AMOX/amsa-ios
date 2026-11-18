@@ -102,4 +102,18 @@ enum ProfileOptions {
     static func serializeMajors(_ majors: [String]) -> String {
         majors.map { $0.trimmed }.filter { !$0.isEmpty }.prefix(3).joined(separator: " / ")
     }
+
+    /// US state names (incl. DC), alphabetical — what the profile's `state` dropdown stores.
+    static let stateNames: [String] = StaticData.states.map(\.name).sorted()
+
+    /// The dropdown value for a stored free-text `state`: "MD" / "maryland" → "Maryland",
+    /// mirroring the server's `normalizeState`. Unrecognised text is kept as-is.
+    static func stateName(for raw: String?) -> String {
+        let s = (raw ?? "").trimmed
+        if s.isEmpty { return "" }
+        if let name = StaticData.stateName(s.uppercased()) { return name }
+        let lower = s.lowercased()
+        if ["washington d.c.", "washington dc"].contains(lower) { return StaticData.stateName("DC") ?? s }
+        return stateNames.first { $0.lowercased() == lower } ?? s
+    }
 }

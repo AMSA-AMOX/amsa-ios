@@ -142,6 +142,10 @@ struct EditProfileModal: View {
     @State private var degreeLevel: String
     @State private var schoolYear: String
     @State private var graduationYear: String
+    @State private var city: String
+    @State private var state: String
+    @State private var phoneNumber: String
+    @State private var personalEmail: String
     @State private var x: String
     @State private var facebook: String
     @State private var instagram: String
@@ -172,6 +176,10 @@ struct EditProfileModal: View {
         _degreeLevel = State(initialValue: profile.degreeLevel ?? "")
         _schoolYear = State(initialValue: profile.schoolYear ?? "")
         _graduationYear = State(initialValue: profile.graduationYear?.value ?? "")
+        _city = State(initialValue: profile.city ?? "")
+        _state = State(initialValue: ProfileOptions.stateName(for: profile.state))
+        _phoneNumber = State(initialValue: profile.phoneNumber ?? "")
+        _personalEmail = State(initialValue: profile.personalEmail ?? "")
         _x = State(initialValue: profile.x ?? "")
         _facebook = State(initialValue: profile.facebook ?? "")
         _instagram = State(initialValue: profile.instagram ?? "")
@@ -185,6 +193,7 @@ struct EditProfileModal: View {
                 photoSection
                 basicInfo
                 educationSection.zIndex(1)
+                locationAndContact
                 socialLinks
                 Color.clear.frame(height: 8)
             }
@@ -434,6 +443,44 @@ struct EditProfileModal: View {
         }
     }
 
+    // MARK: Location & contact
+
+    private var locationAndContact: some View {
+        // A stored value outside the list (e.g. a typo from the membership form) stays selectable until changed.
+        let states = ProfileOptions.stateNames.contains(state) || state.isEmpty
+            ? ProfileOptions.stateNames : [state] + ProfileOptions.stateNames
+        return VStack(alignment: .leading, spacing: 0) {
+            sectionTitle("Location & Contact")
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .top, spacing: 12) {
+                        LabeledField(label: "City") {
+                            WebTextField(placeholder: "e.g. College Park", text: $city, contentType: .addressCity,
+                                         autocapitalization: .words)
+                        }
+                        LabeledField(label: "State") {
+                            OptionSelect(placeholder: "Select…", options: states, selection: $state)
+                        }
+                    }
+                    Text("Shown with your name on the Places page for your state.")
+                        .tw(.px(11)).foregroundStyle(Palette.gray400)
+                }
+                LabeledField(label: "Phone") {
+                    WebTextField(placeholder: "(555) 123-4567", text: $phoneNumber, keyboard: .phonePad,
+                                 contentType: .telephoneNumber)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    LabeledField(label: "Personal Email") {
+                        WebTextField(placeholder: "you@gmail.com", text: $personalEmail, keyboard: .emailAddress,
+                                     contentType: .emailAddress, autocapitalization: .never)
+                    }
+                    Text("Phone and personal email are only visible to AMSA admins.")
+                        .tw(.px(11)).foregroundStyle(Palette.gray400)
+                }
+            }
+        }
+    }
+
     // MARK: Social links
 
     private var socialLinks: some View {
@@ -486,7 +533,9 @@ struct EditProfileModal: View {
                     "bio": .string(bio), "profilePic": .string(uploadedUrl), "schoolName": .string(schoolName),
                     "schoolEmail": .string(schoolEmail), "degreeLevel": .string(degreeLevel),
                     "major": .string(ProfileOptions.serializeMajors(majorValues)), "schoolYear": .string(schoolYear),
-                    "graduationYear": .string(graduationYear), "x": .string(x), "facebook": .string(facebook),
+                    "graduationYear": .string(graduationYear), "city": .string(city.trimmed), "state": .string(state),
+                    "phoneNumber": .string(phoneNumber.trimmed), "personalEmail": .string(personalEmail.trimmed),
+                    "x": .string(x), "facebook": .string(facebook),
                     "instagram": .string(instagram), "linkedin": .string(linkedin),
                 ]
                 let data = try await session.api.send(UserAPI.updateProfile(fields))

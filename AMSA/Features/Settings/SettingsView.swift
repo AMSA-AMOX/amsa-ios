@@ -16,6 +16,7 @@ struct SettingsView: View {
     @State private var confirmOpen = false
     @State private var feedbackOpen = false
     @State private var signOutConfirm = false
+    @State private var editOpen = false
 
     var body: some View {
         ScrollView {
@@ -35,6 +36,11 @@ struct SettingsView: View {
             .padding(.bottom, 40)
         }
         .task { await load() }
+        .webModal(isPresented: $editOpen, backdropOpacity: 0.55, dismissOnBackdrop: { true }) {
+            if let me {
+                EditProfileModal(profile: me, isPresented: $editOpen) { updated in self.me = updated }
+            }
+        }
         .webModal(isPresented: $confirmOpen, dismissOnBackdrop: { true }) {
             DeleteAccountDialog(isPresented: $confirmOpen) { session.logout() }
         }
@@ -183,7 +189,7 @@ struct SettingsView: View {
                 HStack {
                     sectionLabel("Profile")
                     Spacer()
-                    Button { router.back(to: .profile()) } label: {
+                    Button { editOpen = true } label: {
                         Text("Edit profile").tw(.sm, .semibold).foregroundStyle(Palette.navy)
                     }
                     .buttonStyle(.plain)
