@@ -212,6 +212,8 @@ struct SettingsView: View {
 
     private var dangerZone: some View {
         let isAdmin = session.user?.role == Role.admin
+        let isBoard = session.user?.role == Role.boardMember
+        let blocked = isAdmin || isBoard
         return VStack(alignment: .leading, spacing: 12) {
             sectionLabel("Danger zone", color: Palette.red500)
             VStack(alignment: .leading, spacing: 16) {
@@ -219,6 +221,8 @@ struct SettingsView: View {
                     Text("Delete account").tw(.base, .semibold).foregroundStyle(Palette.gray900)
                     Text(isAdmin
                          ? "Admin accounts can't be deleted from settings. Ask another admin to change your role first."
+                         : isBoard
+                         ? "Board member accounts can't be deleted from settings. Ask an admin."
                          : "Permanently removes your profile, posts, questions, comments, reviews, and event reservations. This can't be undone.")
                         .tw(.sm).foregroundStyle(Palette.gray500)
                 }
@@ -234,8 +238,8 @@ struct SettingsView: View {
                             .strokeBorder(Palette.red500, lineWidth: 2))
                 }
                 .buttonStyle(.plain)
-                .disabled(isAdmin)
-                .opacity(isAdmin ? 0.4 : 1)
+                .disabled(blocked)
+                .opacity(blocked ? 0.4 : 1)
             }
             .padding(.top, 16)
             .topBorder(Palette.gray300, width: 2)

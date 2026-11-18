@@ -259,7 +259,7 @@ private struct ReviewItem: View {
         let author = review.author
         let initials = author.map { String.initials($0.firstName, $0.lastName) } ?? "?"
         let name = author.map { "\($0.firstName ?? "") \($0.lastName ?? "")".trimmed } ?? "Member"
-        let canDelete = session.user?.id == review.userId || session.role == Role.admin
+        let canDelete = Role.canDelete(session.role) && (session.user?.id == review.userId || session.role == Role.admin)
 
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {

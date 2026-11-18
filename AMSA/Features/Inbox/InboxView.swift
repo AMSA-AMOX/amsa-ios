@@ -108,7 +108,7 @@ struct InboxView: View {
                             isAnonDraft: Binding(get: { anonDraft[thread.id] ?? false }, set: { anonDraft[thread.id] = $0 }),
                             onSubmit: { answer(thread.id) },
                             onToggleAnon: { toggleAnon(thread.id) },
-                            onDelete: { delete(thread.id) },
+                            onDelete: Role.canDelete(session.role) ? { delete(thread.id) } : nil,
                             submitting: submitting.contains(thread.id),
                             toggling: toggling.contains(thread.id),
                             deleting: deleting.contains(thread.id),
@@ -195,7 +195,8 @@ private struct ReceivedThreadRow: View {
     @Binding var isAnonDraft: Bool
     let onSubmit: () -> Void
     let onToggleAnon: () -> Void
-    let onDelete: () -> Void
+    /// nil for board members, who can't delete.
+    let onDelete: (() -> Void)?
     let submitting: Bool
     let toggling: Bool
     let deleting: Bool
@@ -251,7 +252,7 @@ private struct ReceivedThreadRow: View {
                         .background(Capsule().fill(Palette.gray100))
                 }
                 Spacer(minLength: 0)
-                if confirmDelete {
+                if let onDelete, confirmDelete {
                     HStack(spacing: 8) {
                         Text("Delete this thread?").tw(.xs).foregroundStyle(Palette.gray500)
                         Button {
@@ -267,7 +268,7 @@ private struct ReceivedThreadRow: View {
                         }
                         .buttonStyle(.plain)
                     }
-                } else {
+                } else if onDelete != nil {
                     Button { confirmDelete = true } label: {
                         Text("Delete").tw(.xs, .medium).foregroundStyle(Palette.red400)
                     }

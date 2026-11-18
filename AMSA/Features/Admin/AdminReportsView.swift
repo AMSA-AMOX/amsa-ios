@@ -148,14 +148,17 @@ struct AdminReportsView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(isBusy)
-                Button { confirmRemove = report } label: {
-                    Text(report.targetType == "user" ? "Clear profile" : "Remove").tw(.xs, .semibold).foregroundStyle(Palette.white)
-                        .padding(.horizontal, 12).padding(.vertical, 6)
-                        .background(RoundedRectangle(cornerRadius: TW.dashboardButtonRadius).fill(Palette.red600))
+                // Board members can dismiss reports but not delete the content.
+                if Role.canDelete(session.role) {
+                    Button { confirmRemove = report } label: {
+                        Text(report.targetType == "user" ? "Clear profile" : "Remove").tw(.xs, .semibold).foregroundStyle(Palette.white)
+                            .padding(.horizontal, 12).padding(.vertical, 6)
+                            .background(RoundedRectangle(cornerRadius: TW.dashboardButtonRadius).fill(Palette.red600))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isBusy || report.preview == nil)
+                    .opacity(isBusy || report.preview == nil ? 0.5 : 1)
                 }
-                .buttonStyle(.plain)
-                .disabled(isBusy || report.preview == nil)
-                .opacity(isBusy || report.preview == nil ? 0.5 : 1)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
