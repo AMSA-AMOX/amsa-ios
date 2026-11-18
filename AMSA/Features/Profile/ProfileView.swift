@@ -279,11 +279,12 @@ struct ProfileView: View {
             } else if posts.isEmpty {
                 EmptyState(image: "Leaves", title: "No posts yet", subtitle: "Posts you create will appear here.")
             } else {
+                let onDelete: ((Int) -> Void)? = Role.canDelete(session.role) ? { deletePost($0) } : nil
                 ForEach(posts) { post in
                     PostCard(post: post,
                              onAppreciate: { appreciatePost($0, posts: $posts, appreciating: $appreciating, api: session.api) },
                              appreciating: appreciating.contains(post.id), showAuthor: true, authorClickable: false,
-                             onDelete: deletePost, deleting: deletingPost.contains(post.id))
+                             onDelete: onDelete, deleting: deletingPost.contains(post.id))
                 }
             }
         }
@@ -344,7 +345,9 @@ struct ProfileView: View {
                         HStack(alignment: .top, spacing: 12) {
                             Text(t.question).tw(.xl, .bold, leading: .snug).foregroundStyle(Palette.gray900)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                            ThreadDeleteButton(deleting: deletingThread.contains(t.id)) { deleteThread(t.id) }
+                            if Role.canDelete(session.role) {
+                                ThreadDeleteButton(deleting: deletingThread.contains(t.id)) { deleteThread(t.id) }
+                            }
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 16)
@@ -385,7 +388,9 @@ struct ProfileView: View {
                             HStack(alignment: .top, spacing: 12) {
                                 Text(t.question).tw(.lg, .bold, leading: .snug).foregroundStyle(Palette.gray900)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                ThreadDeleteButton(deleting: deletingThread.contains(t.id)) { deleteThread(t.id) }
+                                if Role.canDelete(session.role) {
+                                    ThreadDeleteButton(deleting: deletingThread.contains(t.id)) { deleteThread(t.id) }
+                                }
                             }
                             Text(RelativeTime.shortUnbounded.format(t.createdAt)).tw(.xs).foregroundStyle(Palette.gray400)
                         }

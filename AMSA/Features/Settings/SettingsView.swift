@@ -16,6 +16,7 @@ struct SettingsView: View {
     @State private var confirmOpen = false
     @State private var feedbackOpen = false
     @State private var signOutConfirm = false
+    @State private var editOpen = false
 
     var body: some View {
         ScrollView {
@@ -35,6 +36,11 @@ struct SettingsView: View {
             .padding(.bottom, 40)
         }
         .task { await load() }
+        .webModal(isPresented: $editOpen, backdropOpacity: 0.55, dismissOnBackdrop: { true }) {
+            if let me {
+                EditProfileModal(profile: me, isPresented: $editOpen) { updated in self.me = updated }
+            }
+        }
         .webModal(isPresented: $confirmOpen, dismissOnBackdrop: { true }) {
             DeleteAccountDialog(isPresented: $confirmOpen) { session.logout() }
         }
@@ -183,7 +189,7 @@ struct SettingsView: View {
                 HStack {
                     sectionLabel("Profile")
                     Spacer()
-                    Button { router.back(to: .profile()) } label: {
+                    Button { editOpen = true } label: {
                         Text("Edit profile").tw(.sm, .semibold).foregroundStyle(Palette.navy)
                     }
                     .buttonStyle(.plain)
@@ -206,6 +212,8 @@ struct SettingsView: View {
 
     private var dangerZone: some View {
         let isAdmin = session.user?.role == Role.admin
+        let isBoard = session.user?.role == Role.boardMember
+        let blocked = isAdmin || isBoard
         return VStack(alignment: .leading, spacing: 12) {
             sectionLabel("Danger zone", color: Palette.red500)
             VStack(alignment: .leading, spacing: 16) {
@@ -213,6 +221,8 @@ struct SettingsView: View {
                     Text("Delete account").tw(.base, .semibold).foregroundStyle(Palette.gray900)
                     Text(isAdmin
                          ? "Admin accounts can't be deleted from settings. Ask another admin to change your role first."
+                         : isBoard
+                         ? "Board member accounts can't be deleted from settings. Ask an admin."
                          : "Permanently removes your profile, posts, questions, comments, reviews, and event reservations. This can't be undone.")
                         .tw(.sm).foregroundStyle(Palette.gray500)
                 }
@@ -228,8 +238,8 @@ struct SettingsView: View {
                             .strokeBorder(Palette.red500, lineWidth: 2))
                 }
                 .buttonStyle(.plain)
-                .disabled(isAdmin)
-                .opacity(isAdmin ? 0.4 : 1)
+                .disabled(blocked)
+                .opacity(blocked ? 0.4 : 1)
             }
             .padding(.top, 16)
             .topBorder(Palette.gray300, width: 2)

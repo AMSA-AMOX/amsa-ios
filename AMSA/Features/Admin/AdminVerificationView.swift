@@ -8,7 +8,6 @@ struct AdminVerificationView: View {
 
     @State private var status: ReviewFilter = .pending
     @State private var submissions: [VerificationSubmission] = []
-    @State private var selectedRoles: [String: String] = [:]
     @State private var adminNotes: [String: String] = [:]
     @State private var loadingSubmissions = true
     @State private var actionId: String?
@@ -33,7 +32,7 @@ struct AdminVerificationView: View {
     private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                Text("Review verification forms, assign role, and approve or reject users.")
+                Text("Review US Member applications. Approving makes the applicant a US Member; rejecting leaves them a Member.")
                     .tw(.sm).foregroundStyle(Palette.gray500)
                     .padding(.top, 4)
                     .padding(.bottom, 20)
@@ -145,24 +144,11 @@ struct AdminVerificationView: View {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                    AdminFieldLabel(text: "Assign Role")
-                    WebSelect(
-                        options: [("Member", Role.member), ("US Member", Role.usMember)],
-                        selection: Binding(get: { selectedRoles[s.id] ?? Role.member },
-                                           set: { selectedRoles[s.id] = $0 }),
-                        style: .adminNote,
-                        showsChevron: true,
-                        disabled: locked
-                    )
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    AdminFieldLabel(text: "Admin Note")
-                    WebTextArea(placeholder: "",
-                                text: Binding(get: { adminNotes[s.id] ?? "" }, set: { adminNotes[s.id] = $0 }),
-                                style: .adminNote, rows: 2, disabled: locked)
-                }
+            VStack(alignment: .leading, spacing: 4) {
+                AdminFieldLabel(text: "Admin Note")
+                WebTextArea(placeholder: "",
+                            text: Binding(get: { adminNotes[s.id] ?? "" }, set: { adminNotes[s.id] = $0 }),
+                            style: .adminNote, rows: 2, disabled: locked)
             }
 
             FlowLayout(spacing: 8) {
@@ -189,7 +175,6 @@ struct AdminVerificationView: View {
             submissions = rows
             if let current = expandedId, !rows.contains(where: { $0.id == current }) { expandedId = nil }
             for row in rows {
-                if selectedRoles[row.id] == nil { selectedRoles[row.id] = row.assignedRole ?? Role.member }
                 if adminNotes[row.id] == nil { adminNotes[row.id] = row.adminNote ?? "" }
             }
         } catch {
@@ -206,9 +191,7 @@ struct AdminVerificationView: View {
         error = nil
         do {
             _ = try await session.api.send(AdminAPI.reviewVerification(
-                s.id, status: reviewStatus,
-                assignedRole: reviewStatus == "approved" ? selectedRoles[s.id] ?? Role.member : nil,
-                adminNote: adminNotes[s.id] ?? ""))
+                s.id, status: reviewStatus, adminNote: adminNotes[s.id] ?? ""))
             shell.invalidate()
             await load(status)
         } catch {

@@ -84,7 +84,7 @@ struct FeedView: View {
     private func postCard(_ post: PostItem) -> PostCard {
         let me = session.user?.id
         let isMine = post.author?.id == me
-        let canDelete = isMine || role == Role.admin || role == Role.boardMember
+        let canDelete = Role.canDelete(role) && (isMine || role == Role.admin)
         let onFollow: ((Int) -> Void)? = isMine ? nil : { follow($0) }
         let onDelete: ((Int) -> Void)? = canDelete ? { delete($0) } : nil
         let onReport: ((Int) -> Void)? = isMine ? nil : { _ in report(post) }

@@ -118,11 +118,10 @@ enum AdminAPI {
         Endpoint(path: "/api/admin/verification", query: [("status", status)])
     }
 
-    /// `assignedRole: undefined` is dropped by `JSON.stringify`, so rejections omit the key.
-    static func reviewVerification(_ id: String, status: String, assignedRole: String?, adminNote: String) -> Endpoint<Empty> {
-        var body: [String: JSONValue] = ["reviewStatus": .string(status), "adminNote": .string(adminNote)]
-        if let assignedRole { body["assignedRole"] = .string(assignedRole) }
-        return Endpoint(method: .patch, path: "/api/admin/verification/\(id)", body: .object(body))
+    /// Approving always makes the applicant a US member; the server decides the role.
+    static func reviewVerification(_ id: String, status: String, adminNote: String) -> Endpoint<Empty> {
+        Endpoint(method: .patch, path: "/api/admin/verification/\(id)",
+                 body: ["reviewStatus": .string(status), "adminNote": .string(adminNote)])
     }
 
     static func posts(status: String) -> Endpoint<ModerationPostsResponse> {

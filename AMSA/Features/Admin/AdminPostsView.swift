@@ -95,15 +95,17 @@ struct AdminPostsView: View {
                         }
                     }
                     Spacer(minLength: 0) // `ml-auto`
-                    Button { Task { await delete(post.id) } } label: {
-                        Text(deletingId == post.id ? "Deleting…" : "Delete").tw(.sm, .semibold).foregroundStyle(Palette.gray500)
-                            .padding(.horizontal, 17).padding(.vertical, 9)
-                            .overlay(RoundedRectangle(cornerRadius: TW.dashboardButtonRadius)
-                                .strokeBorder(Palette.gray200, lineWidth: 1))
+                    if Role.canDelete(session.role) {
+                        Button { Task { await delete(post.id) } } label: {
+                            Text(deletingId == post.id ? "Deleting…" : "Delete").tw(.sm, .semibold).foregroundStyle(Palette.gray500)
+                                .padding(.horizontal, 17).padding(.vertical, 9)
+                                .overlay(RoundedRectangle(cornerRadius: TW.dashboardButtonRadius)
+                                    .strokeBorder(Palette.gray200, lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(deletingId == post.id)
+                        .opacity(deletingId == post.id ? 0.5 : 1)
                     }
-                    .buttonStyle(.plain)
-                    .disabled(deletingId == post.id)
-                    .opacity(deletingId == post.id ? 0.5 : 1)
                 }
                 .padding(.top, 16)
             }
